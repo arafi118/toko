@@ -15,7 +15,14 @@ function __calculate_amount(calculation_type, calculation_amount, amount){
 		case 'percentage':
 			return parseFloat((calculation_amount/100)*amount);
 		case 'fee':
-			return parseFloat((calculation_amount/100)*amount);
+			var total_laba_penjualan = parseFloat($('#total_laba_penjualan').val())
+			var fee = parseFloat((calculation_amount/100)*total_laba_penjualan);
+
+			if (fee < 0) {
+				return 0
+			}
+
+			return fee
 		default:
 			return 0;
 	}

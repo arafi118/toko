@@ -1227,7 +1227,7 @@ class TransactionUtil extends Util
 
 
         $output['discount_type'] = $transaction->discount_type;
-        $output['discount'] = ($discount != 0) ? $discount : 0;
+        $output['discount'] = ($discount >= 0) ? $discount : 0;
 
         //Format tax
         if (!empty($output['taxes'])) {

@@ -432,6 +432,7 @@ class ProductUtil extends Util
             'vld.qty_available',
             'variations.default_sell_price',
             'variations.sell_price_inc_tax',
+            'variations.dpp_inc_tax',
             'variations.id as variation_id',
             'units.short_name as unit',
             'units.allow_decimal as unit_allow_decimal',
@@ -482,7 +483,7 @@ class ProductUtil extends Util
                 $output['discount'] = ($this->num_uf($discount['discount_amount']) / 100) * $output['total_before_tax'];
             }
 
-            if ($discount['discount_type'] == 'fee') {
+            if ($discount['discount_type'] == 'fee' || $output['discount'] < 0) {
                 $output['discount'] = 0;
             }
         }

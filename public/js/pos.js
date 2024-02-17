@@ -410,11 +410,16 @@ $(document).ready(function () {
 
 		var tax_rate = tr.find('select.tax_id').find(':selected').data('rate');
 		var quantity = __read_number(tr.find('input.pos_quantity'));
+		var dpp_inc_tax = __read_number(tr.find('input.row_dpp_inc_tax'))
 
 		var line_total = quantity * unit_price_inc_tax;
+		var total_dpp = quantity * dpp_inc_tax;
+
+		var laba_product = line_total - total_dpp;
 		var discounted_unit_price = __get_principle(unit_price_inc_tax, tax_rate);
 		var unit_price = get_unit_price_from_discounted_unit_price(tr, discounted_unit_price);
 
+		__write_number(tr.find('input.row_laba_product'), laba_product);
 		__write_number(tr.find('input.pos_unit_price'), unit_price);
 		__write_number(tr.find('input.pos_line_total'), line_total, false, 2);
 		tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
@@ -1316,11 +1321,13 @@ function pos_each_row(row_obj) {
 
 function pos_total_row() {
 	var total_quantity = 0;
+	var total_laba = 0;
 	var price_total = 0;
 
 	$('table#pos_table tbody tr').each(function () {
 		total_quantity = total_quantity + __read_number($(this).find('input.pos_quantity'));
 		price_total = price_total + __read_number($(this).find('input.pos_line_total'));
+		total_laba = total_laba + __read_number($(this).find('input.row_laba_product'));
 	});
 
 	//Go through the modifier prices.
@@ -1339,6 +1346,7 @@ function pos_total_row() {
 	//$('span.unit_price_total').html(unit_price_total);
 	$('span.price_total').html(__currency_trans_from_en(price_total, false));
 
+	var total_laba_penjualan = $('#total_laba_penjualan').val(total_laba)
 	calculate_billing_details(price_total);
 
 	priceDetail()

@@ -54,33 +54,33 @@
                     <div class="box-body">
                         <input type="hidden" name="hidden_price_group" id="hidden_price_group">
                         <!-- @if (!empty($price_groups))
-          @if (count($price_groups) > 1)
+              @if (count($price_groups) > 1)
     <div class="col-sm-4" style="display: none;">
-            <div class="form-group">
-             <div class="input-group">
-              <span class="input-group-addon">
-               <i class="fa fa-money"></i>
-              </span>
-              @php
-                  reset($price_groups);
-              @endphp
-              
-              {!! Form::text('hidden_price_group', key($price_groups), ['id' => 'hidden_price_group']) !!}
-              {!! Form::select('price_group', $price_groups, null, ['class' => 'form-control select2', 'id' => 'price_group']) !!}
-              <span class="input-group-addon">
-               @show_tooltip(__('lang_v1.price_group_help_text'))
-              </span>
-             </div>
-            </div>
-           </div>
-           <div class="clearfix"></div>
+                <div class="form-group">
+                 <div class="input-group">
+                  <span class="input-group-addon">
+                   <i class="fa fa-money"></i>
+                  </span>
+                  @php
+                      reset($price_groups);
+                  @endphp
+                  
+                  {!! Form::text('hidden_price_group', key($price_groups), ['id' => 'hidden_price_group']) !!}
+                  {!! Form::select('price_group', $price_groups, null, ['class' => 'form-control select2', 'id' => 'price_group']) !!}
+                  <span class="input-group-addon">
+                   @show_tooltip(__('lang_v1.price_group_help_text'))
+                  </span>
+                 </div>
+                </div>
+               </div>
+               <div class="clearfix"></div>
 @else
     @php
         reset($price_groups);
     @endphp
-           {!! Form::hidden('price_group', key($price_groups), ['id' => 'price_group']) !!}
+               {!! Form::hidden('price_group', key($price_groups), ['id' => 'price_group']) !!}
     @endif
-         @endif -->
+             @endif -->
 
                         <div class="@if (!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
                             <div class="form-group">
@@ -204,7 +204,6 @@
                                         [
                                             'fixed' => __('lang_v1.fixed'),
                                             'percentage' => __('lang_v1.percentage'),
-                                            'fee' => __('lang_v1.fee'),
                                         ],
                                         'percentage',
                                         [

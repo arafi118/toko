@@ -4,6 +4,7 @@
 
 @section('content')
     <input type="hidden" id="__precision" value="{{ config('constants.currency_precision') }}">
+    <input type="hidden" name="total_laba_penjualan" id="total_laba_penjualan">
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>@lang('sale.add_sale')</h1>
