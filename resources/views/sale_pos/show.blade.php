@@ -253,7 +253,7 @@ $trans = new Transaction();
                                     $discount .= '%';
                                 }
 
-                                if ($sell->discount_type == 'fee') {
+                                if ($sell->discount_type == 'fee' || $discount < 0) {
                                     $discount = 0;
                                 }
                             @endphp
@@ -319,6 +319,11 @@ $trans = new Transaction();
                                 </th>
                                 <td><b>(-)</b></td>
                                 <td>
+                                    @php
+                                        if ($sell->discount_type == 'fee' || $discount < 0) {
+                                            $discount = 0;
+                                        }
+                                    @endphp
                                     @if ($sell->discount_type != 'percentage')
                                         <span class="display_currency pull-right" data-currency_symbol="true">
                                             {{ $discount }}
