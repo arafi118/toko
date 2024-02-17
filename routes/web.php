@@ -13,11 +13,9 @@
 
 include_once('install.php');
 
-Route::middleware(['IsInstalled'])->group(function ()
-{
+Route::middleware(['IsInstalled'])->group(function () {
 
-    Route::get('/', function ()
-    {
+    Route::get('/', function () {
         return redirect('/login');
     });
 
@@ -30,15 +28,14 @@ Route::middleware(['IsInstalled'])->group(function ()
 });
 
 Route::get('/link', function () {
-    $target = '/home/siupk/public_html/toko/core/storage/app/public';
-    $shortcut = '/home/siupk/public_html/toko/public/storage';
+    $target = '	/home/siupk/public_html/toko_siupk/storage/app/public';
+    $shortcut = '	/home/siupk/public_html/toko_siupk/public/storage';
     symlink($target, $shortcut);
 });
 
 
 //Routes for authenticated users only
-Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezone'])->group(function ()
-{
+Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezone'])->group(function () {
 
     Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 
@@ -46,7 +43,7 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     Route::post('/home/get-purchase-details', 'HomeController@getPurchaseDetails');
     Route::post('/home/get-sell-details', 'HomeController@getSellDetails');
     Route::get('/home/get-produk-populer', 'HomeController@getProductPopuler');
-     Route::get('/home/get-purchase-supplier', 'HomeController@getPurchaseSupplier');
+    Route::get('/home/get-purchase-supplier', 'HomeController@getPurchaseSupplier');
     Route::get('/home/product-stock-alert', 'HomeController@getProductStockAlert');
     Route::get('/home/purchase-payment-dues', 'HomeController@getPurchasePaymentDues');
     Route::get('/home/sales-payment-dues', 'HomeController@getSalesPaymentDues');
@@ -152,11 +149,11 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     //Laporan
     Route::get('/laporan', 'LaporanController@index')->name('laporan');
     Route::get('/tutup-saldo', 'LaporanController@tutup')->name('tutup-saldo');
-    
+
     Route::get('/laporan/inventaris', 'LaporanController@inventaris');
     Route::get('/laporan/biaya_dibayar_dimuka', 'LaporanController@inventaris');
     Route::get('/laporan/aktiva_tetap', 'LaporanController@inventaris');
-    
+
     Route::get('/laporan/neraca', 'LaporanController@neraca')->name('neraca');
     Route::get('/laporan/saldo_neraca', 'LaporanController@saldo_neraca')->name('saldo_neraca');
     Route::get('/laporan/laba_rugi', 'LaporanController@laba_rugi')->name('laba_rugi');
@@ -180,17 +177,17 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     Route::get('/reports/trending-products', 'ReportController@getTrendingProducts');
     Route::get('/reports/expense-report', 'ReportController@getExpenseReport');
     Route::get('/reports/stock-adjustment-report', 'ReportController@getStockAdjustmentReport');
-    
+
     Route::get('/stock-adjustments/remove-expired-stock/{purchase_line_id}', 'StockAdjustmentController@removeExpiredStock');
     Route::post('/stock-adjustments/get_product_row', 'StockAdjustmentController@getProductRow');
     Route::resource('stock-adjustments', 'StockAdjustmentController');
-    
+
     //new so
     Route::get('/penyesuaian/daftar-stock-opname', 'StockAdjustmentController@getDaftarSO');
     Route::get('/penyesuaian/print-daftar-so', 'StockAdjustmentController@printDaftarSO');
     Route::get('/penyesuaian/stock-adjustments', 'StockAdjustmentController@getStockAdjustment');
     Route::get('/stock/{id}/print', 'StockAdjustmentController@print');
-    
+
     Route::get('/reports/register-report', 'ReportController@getRegisterReport');
     Route::get('/reports/sales-representative-report', 'ReportController@getSalesRepresentativeReport');
     Route::get('/reports/sales-representative-total-expense', 'ReportController@getSalesRepresentativeTotalExpense');
@@ -209,8 +206,7 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     Route::get('/reports/print-sell-periode', 'ReportController@printSellPeriode');
 
     //Business Location Settings...
-    Route::prefix('business-location/{location_id}')->name('location.')->group(function ()
-    {
+    Route::prefix('business-location/{location_id}')->name('location.')->group(function () {
         Route::get('settings', 'LocationSettingsController@index')->name('settings');
         Route::post('settings', 'LocationSettingsController@updateSettings')->name('settings_update');
     });
@@ -305,8 +301,7 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     Route::resource('/purchase-return', 'PurchaseReturnController');
 
     //Restaurant module
-    Route::group(['prefix' => 'modules'], function ()
-    {
+    Route::group(['prefix' => 'modules'], function () {
 
         Route::resource('tables', 'Restaurant\TableController');
         Route::resource('modifiers', 'Restaurant\ModifierSetsController');
@@ -330,7 +325,7 @@ Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezon
     Route::get('bookings/get-todays-bookings', 'Restaurant\BookingController@getTodaysBookings');
     Route::resource('bookings', 'Restaurant\BookingController');
     Route::resource('jurnal', 'JurnalController');
-    Route::get('get_rekening/{id}/{jenis_trx}','JurnalController@getRekening')->name('jurnal.get_rekening');
+    Route::get('get_rekening/{id}/{jenis_trx}', 'JurnalController@getRekening')->name('jurnal.get_rekening');
     Route::get('get_pasangan/{id}', 'JurnalController@getPasangan')->name('jurnal.get_pasangan');
     Route::get('get_hutang/{id}', 'JurnalController@getHutang')->name('jurnal.get_hutang');
     Route::resource('pembayaran_hutang', 'PembayaranHutangController');
