@@ -28,8 +28,8 @@ Route::middleware(['IsInstalled'])->group(function () {
 });
 
 Route::get('/link', function () {
-    $target = '	/home/siupk/public_html/toko_siupk/storage/app/public';
-    $shortcut = '	/home/siupk/public_html/toko_siupk/public/storage';
+    $target = '/home/siupk/public_html/toko_siupk/storage/app/public';
+    $shortcut = '/home/siupk/public_html/toko_siupk/public/storage';
     symlink($target, $shortcut);
 });
 
