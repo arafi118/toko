@@ -320,7 +320,7 @@ $trans = new Transaction();
                                 <td><b>(-)</b></td>
                                 <td>
                                     @php
-                                        if ($sell->discount_type == 'fee' || $discount < 0) {
+                                        if ($discount < 0) {
                                             $discount = 0;
                                         }
                                     @endphp
