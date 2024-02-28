@@ -6,7 +6,7 @@ $host = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
 $host = preg_replace('/^www\./', '', $host);
 
 if ($host == 'toko.test') {
-    $host = 'toko';
+    $host = env('DB_DATABASE', 'toko');
 } else {
     $host = str_replace('.siupk.net', '', $host);
     $host = str_replace('toko', 'siupk', $host);
