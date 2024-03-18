@@ -458,6 +458,7 @@ class LaporanController extends Controller
             'pengawas' => $pengawas,
             'keuangan' => $keuangan,
             'direktur' => $direktur,
+            'jenis_laporan' => ucwords(str_replace('_', ' ', $jenis_laporan))
         ];
 
         if ($req->type == 'pdf') {
