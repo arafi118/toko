@@ -346,7 +346,7 @@ class LaporanController extends Controller
         if (isset($req->tgl)) {
             $tgl_seleksi = "{$thn}-{$bln}-{$tgl}";
         } else {
-            $jumlah_hari = date('d');
+            $jumlah_hari = date('t', strtotime("{$thn}-{$bln}-01"));
             $tgl_seleksi = "{$thn}-{$bln}-{$jumlah_hari}";
         };
 
