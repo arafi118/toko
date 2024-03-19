@@ -273,7 +273,7 @@
                     </table>
                 </td>
                 @php
-                    $date = date('d') . ' ' . array_search(date('m'), array_flip($bulan)) . ' ' . date('Y');
+                    $date = $jumlah_hari . ' ' . array_search(date('m'), array_flip($bulan)) . ' ' . date('Y');
                 @endphp
                 <td class="style27 align-center" valign="top" width="31%"><br>{{ $bl->city }},
                     {{ $date }}<br>Dilaporkan Oleh<br>
