@@ -455,7 +455,6 @@ class LaporanController extends Controller
             'tgl' => $tgl,
             'bln' => $bln,
             'thn' => $thn,
-            'jumlah_hari' => $jumlah_hari,
             'pengawas' => $pengawas,
             'keuangan' => $keuangan,
             'direktur' => $direktur,

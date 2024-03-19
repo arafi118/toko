@@ -273,7 +273,13 @@
                     </table>
                 </td>
                 @php
-                    $date = $jumlah_hari . ' ' . array_search(date('m'), array_flip($bulan)) . ' ' . date('Y');
+                    $tgl_kondisi = explode('-', $tgl_seleksi);
+                    $date =
+                        $tgl_kondisi[2] .
+                        ' ' .
+                        array_search(date($tgl_kondisi[1]), array_flip($bulan)) .
+                        ' ' .
+                        $tgl_kondisi[0];
                 @endphp
                 <td class="style27 align-center" valign="top" width="31%"><br>{{ $bl->city }},
                     {{ $date }}<br>Dilaporkan Oleh<br>
