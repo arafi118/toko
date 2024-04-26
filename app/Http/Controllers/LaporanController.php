@@ -512,6 +512,7 @@ class LaporanController extends Controller
 
     public function bulan($start, $end, $period = "month", $init, $awal_th)
     {
+        $start = date('Y-m-01', strtotime($start));
         $awal_th = Carbon::now()->startOfYear();
 
         $day = 0;
