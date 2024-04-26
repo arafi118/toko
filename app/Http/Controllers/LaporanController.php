@@ -483,7 +483,7 @@ class LaporanController extends Controller
 
         $biaya_susut = ceil($value->nominal / (int) $value->umur_ekonomis);
 
-        $tahun_ini       = $this->bulan($init, $date, 'month', $value->tgl_beli, $awal);
+        $tahun_ini       = $this->bulan($value->tgl_beli, $date, 'month', $value->tgl_beli, $awal);
         $biaya_tahun_ini = $biaya_susut * $tahun_ini;
         $pakai           = $this->bulan($value->tgl_beli, $date, 'month', $value->tgl_beli, $awal);
         $biaya           = $biaya_susut * $pakai;
@@ -515,21 +515,17 @@ class LaporanController extends Controller
         $awal_th = Carbon::now()->startOfYear();
 
         $day = 0;
-        $month = 1;
-        if ($awal_th == $start) {
-            $month = 1;
-        }
+        $month = 0;
 
-        $month_array = array(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+        $month_array = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
         $datestart = strtotime($start);
         $dateend = strtotime($end);
         $init_detik = strtotime($init);
-        $month_start = intVal(strftime("%m", $datestart));
+        $month_start = strftime("%m", $datestart);
         $current_year = strftime("%y", $datestart);
         $diff = $dateend - $datestart;
         $date = $diff / (60 * 60 * 24);
         $day = $date;
-
         $awal = 1;
 
         while ($date > 0) {
@@ -539,7 +535,6 @@ class LaporanController extends Controller
             } else {
                 $loop = 0;
             }
-
             for ($i = $loop; $i < 12; $i++) {
                 if ($current_year % 4 == 0 && $i == 1)
                     $day_of_month = 29;
@@ -554,24 +549,21 @@ class LaporanController extends Controller
                     break;
                 }
                 $month++;
-                // var_dump($month);
             }
 
             $current_year++;
         }
 
-        // die;
+        // if (isset($init)) {
+        //     $awal_tahun_beli = Carbon::parse($init)->startOfYear();
+        //     if ($awal_tahun_beli == $awal_th) {
+        //         $umur_kurang_setahun =  $dateend - $init_detik;
+        //         $umur_bulan = $umur_kurang_setahun / (60 * 60 * 24 * 30);
+        //         $umur_bulan = $umur_bulan;
+        //         $month = $umur_bulan;
+        //     }
+        // }
 
-
-        if (isset($init)) {
-            $awal_tahun_beli = Carbon::parse($init)->startOfYear();
-            if ($awal_tahun_beli == $awal_th) {
-                $umur_kurang_setahun =  $dateend - $init_detik;
-                $umur_bulan = $umur_kurang_setahun / (60 * 60 * 24 * 30);
-                $umur_bulan = floor($umur_bulan);
-                $month = $umur_bulan;
-            }
-        }
         switch ($period) {
             case "day":
                 return $day;
