@@ -485,7 +485,7 @@ class LaporanController extends Controller
 
         $tahun_ini       = $this->bulan($init, $date, 'month', $value->tgl_beli, $awal);
         $biaya_tahun_ini = $biaya_susut * $tahun_ini;
-        $pakai           = $this->bulan($value->tgl_beli, $date, 'month', $value->tgl_beli, $awal);;
+        $pakai           = $this->bulan($value->tgl_beli, $date, 'month', $value->tgl_beli, $awal);
         $biaya           = $biaya_susut * $pakai;
         $nilai           = $pakai ? $value->nominal - $biaya : $value->nominal;
         $biaya1          = $biaya_susut * $value->umur_ekonomis;
@@ -516,9 +516,9 @@ class LaporanController extends Controller
 
         $day = 0;
         $month = 1;
-        // if ($awal_th == $start) {
-        //     $month = 1;
-        // }
+        if ($awal_th == $start) {
+            $month = 1;
+        }
 
         $month_array = array(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
         $datestart = strtotime($start);
@@ -568,7 +568,7 @@ class LaporanController extends Controller
             if ($awal_tahun_beli == $awal_th) {
                 $umur_kurang_setahun =  $dateend - $init_detik;
                 $umur_bulan = $umur_kurang_setahun / (60 * 60 * 24 * 30);
-                $umur_bulan = round($umur_bulan, 0, PHP_ROUND_HALF_DOWN);
+                $umur_bulan = floor($umur_bulan);
                 $month = $umur_bulan;
             }
         }
