@@ -656,6 +656,7 @@ class JenisBuku extends Model
         }
         if ($period == 'bulan_ini') {
             $gethtgptgbiayakirim->whereMonth('transaction_date', $m_now);
+            $gethtgptgbiayakirim->whereYear('transaction_date', $y_now);
         } elseif ($period == 'sd_bulan_lalu') {
             //1 januari tahun ini - akhir bulan lalu
             $gethtgptgbiayakirim->whereBetween('transaction_date', [$awal_tahun, $akhir_bulan_lalu]);
