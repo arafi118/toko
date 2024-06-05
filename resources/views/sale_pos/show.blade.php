@@ -260,7 +260,10 @@ $trans = new Transaction();
                             @if (count($sell->payment_lines) > 0)
                                 @foreach ($sell->payment_lines as $payment_line)
                                     @php
-                                        if ($payment_line->is_return == 1) {
+                                        if (
+                                            $payment_line->is_return == 1 ||
+                                            $payment_line->id_rekening_debit == '515.01'
+                                        ) {
                                             $total_paid -= $payment_line->amount;
                                         } else {
                                             $total_paid += $payment_line->amount;
