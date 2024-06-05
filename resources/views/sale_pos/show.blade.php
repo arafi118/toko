@@ -266,8 +266,18 @@ $trans = new Transaction();
                                             $total_paid += $payment_line->amount;
                                         }
 
-                                        if ($payment_line->id_rekening_debit == '515.01') {
+                                        if (
+                                            $payment_line->id_rekening_debit == '515.01' &&
+                                            $sell->discount_type == 'percentage'
+                                        ) {
                                             $discount = ($sell->discount_amount * $payment_line->amount) / 100;
+                                        }
+
+                                        if (
+                                            $payment_line->id_rekening_debit == '515.01' &&
+                                            $sell->discount_type == 'fixed'
+                                        ) {
+                                            $discount = $sell->discount_amount;
                                         }
                                     @endphp
                                     <tr>
