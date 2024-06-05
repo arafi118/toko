@@ -268,7 +268,7 @@ class SellController extends Controller
         $getpayments = TransactionPayment::where('transaction_id', $transaction_id)
             ->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
         if ($transaction->is_hutang_piutang == 1) {
-            $getpayments->whereNotIn('id_rekening_kredit', ['131.08', '411.04', '411.02', '131.13', '411.19']);
+            $getpayments->whereNotIn('id_rekening_kredit', ['131.08', '411.04', '411.02', '131.13', '411.19', '515.01']);
             $getpayments->whereRaw("LEFT(id_rekening_debit,2) != 51");
         }
         $payments = $getpayments->first();
