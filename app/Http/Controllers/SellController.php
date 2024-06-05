@@ -265,18 +265,24 @@ class SellController extends Controller
     {
         $transaction = Transaction::findOrFail($transaction_id);
 
+        $getDiscount = TransactionPayment::where([
+            ['transaction_id', $transaction_id],
+            ['id_rekening_debit', '=', '515.01']
+        ])->first();
+
         $getpayments = TransactionPayment::where([
             ['transaction_id', $transaction_id],
             ['id_rekening_debit', '!=', '515.01']
-        ])
-            ->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
+        ])->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
+
+
         if ($transaction->is_hutang_piutang == 1) {
             $getpayments->whereNotIn('id_rekening_kredit', ['131.08', '411.04', '411.02', '131.13', '411.19']);
             $getpayments->whereRaw("LEFT(id_rekening_debit,2) != 51");
         }
         $payments = $getpayments->first();
 
-        $kekurangan = $transaction->final_total - $payments->total_payment;
+        $kekurangan = $transaction->final_total - ($payments->total_payment - $getDiscount->amount);
         if ($kekurangan <= '0' && $transaction->payment_status == 'partial' && $transaction->is_hutang_piutang == '1') {
             Transaction::where('id', $transaction_id)->update([
                 'payment_status' => 'paid',
