@@ -282,7 +282,11 @@ class SellController extends Controller
         }
         $payments = $getpayments->first();
 
-        $kekurangan = $transaction->final_total - ($payments->total_payment - $getDiscount->amount);
+        if ($getDiscount) {
+            $kekurangan = $transaction->final_total - ($payments->total_payment - $getDiscount->amount);
+        } else {
+            $kekurangan = $transaction->final_total - ($payments->total_payment);
+        }
         if ($kekurangan <= '0' && $transaction->payment_status == 'partial' && $transaction->is_hutang_piutang == '1') {
             Transaction::where('id', $transaction_id)->update([
                 'payment_status' => 'paid',
