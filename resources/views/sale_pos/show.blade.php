@@ -266,7 +266,7 @@ $trans = new Transaction();
                                             $total_paid += $payment_line->amount;
                                         }
 
-                                        if ($payment_line->id_rekening_debit == '111.04') {
+                                        if ($payment_line->id_rekening_debit == '515.01') {
                                             $discount = ($sell->discount_amount * $payment_line->amount) / 100;
                                         }
                                     @endphp
