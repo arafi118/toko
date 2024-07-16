@@ -128,6 +128,9 @@ class TransactionUtil extends Util
             $invoice_no = $this->getInvoiceNumber($business_id, $input['status'], $transaction->location_id);
         }
 
+        $bayar = $this->num_uf($input['bayar']);
+        $kembali = $this->num_uf($input['kembali']);
+
         $update_date = [
             'status' => $input['status'],
             'invoice_no' => $invoice_no,
@@ -145,12 +148,16 @@ class TransactionUtil extends Util
             'is_quotation' => isset($input['is_quotation']) ? $input['is_quotation'] : 0,
             'shipping_details' => isset($input['shipping_details']) ? $input['shipping_details'] : null,
             'shipping_charges' => isset($input['shipping_charges']) ? $this->num_uf($input['shipping_charges']) : 0,
-            'exchange_rate' => !empty($input['exchange_rate']) ?
-                $this->num_uf($input['exchange_rate']) : 1,
+            'exchange_rate' => !empty($input['exchange_rate']) ? $this->num_uf($input['exchange_rate']) : 1,
             'selling_price_group_id' => isset($input['selling_price_group_id']) ? $input['selling_price_group_id'] : null,
             'pay_term_number' => isset($input['pay_term_number']) ? $input['pay_term_number'] : null,
             'pay_term_type' => isset($input['pay_term_type']) ? $input['pay_term_type'] : null
         ];
+
+        if ($bayar != $transaction->bayar && $bayar > 0) {
+            $update_date['bayar'] = "$bayar";
+            $update_date['kembali'] = "$kembali";
+        }
 
         if (!empty($input['transaction_date'])) {
             $update_date['transaction_date'] = $input['transaction_date'];

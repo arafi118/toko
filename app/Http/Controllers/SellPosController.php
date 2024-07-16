@@ -828,11 +828,11 @@ class SellPosController extends Controller
         $location_printer_type = BusinessLocation::find($location_id)->receipt_printer_type;
 
         $sell_details = TransactionSellLine::join(
-                'products AS p',
-                'transaction_sell_lines.product_id',
-                '=',
-                'p.id'
-            )
+            'products AS p',
+            'transaction_sell_lines.product_id',
+            '=',
+            'p.id'
+        )
             ->join(
                 'variations AS variations',
                 'transaction_sell_lines.variation_id',
@@ -1211,6 +1211,12 @@ class SellPosController extends Controller
             $contact_id = $request->get('contact_id', null);
             $cg = $this->contactUtil->getCustomerGroup($business_id, $contact_id);
             $input['customer_group_id'] = (empty($cg) || empty($cg['id'])) ? null : $cg['id'];
+
+            $bayar = isset($request->bayar) ? $request->bayar : null;
+            $kembali = isset($request->kembali) ? $request->kembali : null;
+
+            $input['bayar'] = $this->transactionUtil->num_uf($bayar);
+            $input['kembali'] = $this->transactionUtil->num_uf($kembali);
 
             //set selling price group id
             if ($request->has('price_group')) {
