@@ -637,7 +637,6 @@ class PurchaseController extends Controller
             }
         }
 
-        dd($purchase);
         return view('purchase.show')->with(compact('taxes', 'purchase', 'payment_methods', 'purchase_taxes'));
     }
 
