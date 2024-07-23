@@ -48,8 +48,10 @@ class PurchaseController extends Controller
         $this->businessUtil = $businessUtil;
         $this->moduleUtil = $moduleUtil;
 
-        $this->dummyPaymentLine = ['method' => 'cash', 'amount' => 0, 'note' => '', 'card_transaction_number' => '', 'card_number' => '', 'card_type' => '', 'card_holder_name' => '', 'card_month' => '', 'card_year' => '', 'card_security' => '', 'cheque_number' => '', 'bank_account_number' => '', 
-        'is_return' => 0, 'transaction_no' => ''];
+        $this->dummyPaymentLine = [
+            'method' => 'cash', 'amount' => 0, 'note' => '', 'card_transaction_number' => '', 'card_number' => '', 'card_type' => '', 'card_holder_name' => '', 'card_month' => '', 'card_year' => '', 'card_security' => '', 'cheque_number' => '', 'bank_account_number' => '',
+            'is_return' => 0, 'transaction_no' => ''
+        ];
     }
 
     /**
@@ -64,56 +66,56 @@ class PurchaseController extends Controller
         }
 
         if (request()->ajax()) {
-           
+
             $business_id = request()->session()->get('user.business_id');
 
             $purchases = Transaction::leftJoin('contacts', 'transactions.contact_id', '=', 'contacts.id')
-                    ->join(
-                        'business_locations AS BS',
-                        'transactions.location_id',
-                        '=',
-                        'BS.id'
-                    )
-                    ->leftJoin(
-                        'transaction_payments AS TP',
-                        'transactions.id',
-                        '=',
-                        'TP.transaction_id'
-                    )
-                    ->leftJoin(
-                        'transactions AS PR',
-                        'transactions.id',
-                        '=',
-                        'PR.return_parent_id'
-                    )
-                    ->where('transactions.business_id', $business_id)
-                    ->where('transactions.type', 'purchase')
-                    ->select(
-                        'transactions.id',
-                        'transactions.document',
-                        'transactions.transaction_date',
-                        'transactions.ref_no',
-                        'contacts.name',
-                        'transactions.status',
-                        'transactions.payment_status',
-                        'transactions.final_total',
-                        'BS.name as location_name',
-                        'PR.id as return_transaction_id',
-                        DB::raw('SUM(TP.amount) as amount_paid'),
-                        /* DB::raw('(SELECT SUM(TP3.amount) FROM transaction_payments AS TP3 WHERE
+                ->join(
+                    'business_locations AS BS',
+                    'transactions.location_id',
+                    '=',
+                    'BS.id'
+                )
+                ->leftJoin(
+                    'transaction_payments AS TP',
+                    'transactions.id',
+                    '=',
+                    'TP.transaction_id'
+                )
+                ->leftJoin(
+                    'transactions AS PR',
+                    'transactions.id',
+                    '=',
+                    'PR.return_parent_id'
+                )
+                ->where('transactions.business_id', $business_id)
+                ->where('transactions.type', 'purchase')
+                ->select(
+                    'transactions.id',
+                    'transactions.document',
+                    'transactions.transaction_date',
+                    'transactions.ref_no',
+                    'contacts.name',
+                    'transactions.status',
+                    'transactions.payment_status',
+                    'transactions.final_total',
+                    'BS.name as location_name',
+                    'PR.id as return_transaction_id',
+                    DB::raw('SUM(TP.amount) as amount_paid'),
+                    /* DB::raw('(SELECT SUM(TP3.amount) FROM transaction_payments AS TP3 WHERE
                         TP3.transaction_id=TP.id AND LEFT(id_rekening_debit,2) != 51) as amount_paid'),*/
-                        DB::raw('(SELECT SUM(TP2.amount) FROM transaction_payments AS TP2 WHERE
+                    DB::raw('(SELECT SUM(TP2.amount) FROM transaction_payments AS TP2 WHERE
                         TP2.transaction_id=PR.id ) as return_paid'),
-                        DB::raw('COUNT(PR.id) as return_exists'),
-                        DB::raw('COALESCE(PR.final_total, 0) as amount_return')
-                    )
-                    ->groupBy('transactions.id');
+                    DB::raw('COUNT(PR.id) as return_exists'),
+                    DB::raw('COALESCE(PR.final_total, 0) as amount_return')
+                )
+                ->groupBy('transactions.id');
 
             $permitted_locations = auth()->user()->permitted_locations();
             if ($permitted_locations != 'all') {
                 $purchases->whereIn('transactions.location_id', $permitted_locations);
             }
-            
+
             if (!empty(request()->supplier_id)) {
                 $supplier_id = request()->supplier_id;
                 $purchases->where('contacts.id', $supplier_id);
@@ -121,18 +123,18 @@ class PurchaseController extends Controller
             if (!empty(request()->start_date) && !empty(request()->end_date)) {
 
                 $start = request()->start_date;
-                
+
                 $end =  request()->end_date;
                 $purchases->whereDate('transactions.transaction_date', '>=', $start)
-                            ->whereDate('transactions.transaction_date', '<=', $end);
+                    ->whereDate('transactions.transaction_date', '<=', $end);
             }
             return Datatables::of($purchases)
                 ->addColumn('action', function ($row) {
                     $html = '<div class="btn-group">
                             <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
                                 data-toggle="dropdown" aria-expanded="false">' .
-                                __("messages.actions") .
-                                '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                        __("messages.actions") .
+                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                 </span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">';
@@ -140,7 +142,7 @@ class PurchaseController extends Controller
                         $html .= '<li><a href="#" data-href="' . action('PurchaseController@show', [$row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-eye" aria-hidden="true"></i>' . __("messages.view") . '</a></li>';
                     }
                     if (auth()->user()->can("purchase.view")) {
-                        $html .= '<li><a href="#" class="print-invoice" data-href="' . action('PurchaseController@printInvoice', [$row->id]) . '"><i class="fa fa-print" aria-hidden="true"></i>'. __("messages.print") .'</a></li>';
+                        $html .= '<li><a href="#" class="print-invoice" data-href="' . action('PurchaseController@printInvoice', [$row->id]) . '"><i class="fa fa-print" aria-hidden="true"></i>' . __("messages.print") . '</a></li>';
                     }
                     if (auth()->user()->can("purchase.update")) {
                         $html .= '<li><a href="' . action('PurchaseController@edit', [$row->id]) . '"><i class="glyphicon glyphicon-edit"></i>' . __("messages.edit") . '</a></li>';
@@ -152,31 +154,31 @@ class PurchaseController extends Controller
                     $html .= '<li><a href="' . action('LabelsController@show') . '?purchase_id=' . $row->id . '" data-toggle="tooltip" title="Print Barcode/Label"><i class="fa fa-barcode"></i>' . __('barcode.labels') . '</a></li>';
 
                     if (auth()->user()->can("purchase.view") && !empty($row->document)) {
-                        $document_name = !empty(explode("_", $row->document, 2)[1]) ? explode("_", $row->document, 2)[1] : $row->document ;
-                        $html .= '<li><a href="' . url('storage/documents/' . $row->document) .'" download="' . $document_name . '"><i class="fa fa-download" aria-hidden="true"></i>' . __("purchase.download_document") . '</a></li>';
+                        $document_name = !empty(explode("_", $row->document, 2)[1]) ? explode("_", $row->document, 2)[1] : $row->document;
+                        $html .= '<li><a href="' . url('storage/documents/' . $row->document) . '" download="' . $document_name . '"><i class="fa fa-download" aria-hidden="true"></i>' . __("purchase.download_document") . '</a></li>';
                     }
-                                        
+
                     if (auth()->user()->can("purchase.create")) {
                         $html .= '<li class="divider"></li>';
                         if ($row->payment_status != 'paid') {
                             $html .= '<li><a href="' . action('TransactionPaymentController@addPayment', [$row->id]) . '" class="add_payment_modal"><i class="fa fa-money" aria-hidden="true"></i>' . __("purchase.add_payment") . '</a></li>';
                         }
                         $html .= '<li><a href="' . action('TransactionPaymentController@show', [$row->id]) .
-                        '" class="view_payment_modal"><i class="fa fa-money" aria-hidden="true" ></i>' . __("purchase.view_payments") . '</a></li>';
+                            '" class="view_payment_modal"><i class="fa fa-money" aria-hidden="true" ></i>' . __("purchase.view_payments") . '</a></li>';
                     }
 
                     if (auth()->user()->can("purchase.update")) {
                         $html .= '<li><a href="' . action('PurchaseReturnController@add', [$row->id]) .
-                        '"><i class="fa fa-undo" aria-hidden="true" ></i>' . __("lang_v1.purchase_return") . '</a></li>';
+                            '"><i class="fa fa-undo" aria-hidden="true" ></i>' . __("lang_v1.purchase_return") . '</a></li>';
                     }
 
                     if (auth()->user()->can("send_notification")) {
-                        if($row->status == 'ordered'){
-                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id,"template_for" => "new_order"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.new_order_notification") . '</a></li>';
-                        } else if($row->status == 'received'){
-                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id,"template_for" => "items_received"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.item_received_notification") . '</a></li>';
-                        } else if($row->status == 'pending'){
-                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id,"template_for" => "items_pending"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.item_pending_notification") . '</a></li>';
+                        if ($row->status == 'ordered') {
+                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id, "template_for" => "new_order"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.new_order_notification") . '</a></li>';
+                        } else if ($row->status == 'received') {
+                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id, "template_for" => "items_received"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.item_received_notification") . '</a></li>';
+                        } else if ($row->status == 'pending') {
+                            $html .= '<li><a href="#" data-href="' . action('NotificationController@getTemplate', ["transaction_id" => $row->id, "template_for" => "items_pending"]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i> ' . __("lang_v1.item_pending_notification") . '</a></li>';
                         }
                     }
 
@@ -184,8 +186,8 @@ class PurchaseController extends Controller
                     return $html;
                 })
                 ->removeColumn('id')
-                ->editColumn('ref_no', function($row){
-                    return !empty($row->return_exists) ? $row->ref_no . ' <small class="label bg-red label-round" title="' . __('lang_v1.some_qty_returned') .'"><i class="fa fa-undo"></i></small>' : $row->ref_no;
+                ->editColumn('ref_no', function ($row) {
+                    return !empty($row->return_exists) ? $row->ref_no . ' <small class="label bg-red label-round" title="' . __('lang_v1.some_qty_returned') . '"><i class="fa fa-undo"></i></small>' : $row->ref_no;
                 })
                 ->editColumn(
                     'final_total',
@@ -204,40 +206,41 @@ class PurchaseController extends Controller
                     '<a href="{{ action("TransactionPaymentController@show", [$id])}}" class="view_payment_modal payment-status payment-status-label" data-orig-value="{{$payment_status}}" data-status-name="{{__(\'lang_v1.\' . $payment_status)}}"><span class="label @payment_status($payment_status)">{{__(\'lang_v1.\' . $payment_status)}}
                         </span></a>'
                 )*/
-                ->addColumn('payment_status',function($row){
+                ->addColumn('payment_status', function ($row) {
                     $due = $this->checkPayment($row->id);
 
-                    if($due == 0){
+                    if ($due == 0) {
                         $status = 'Dibayarkan';
-                    }elseif($due == $row->final_total){
+                    } elseif ($due == $row->final_total) {
                         $status = 'Hutang';
-                    }else{
+                    } else {
                         $status = 'Dibayarkan Sebagian';
                     }
-                   /* return '<a href="{{ action("TransactionPaymentController@show", [$row->id])}}" class="view_payment_modal payment-status payment-status-label" data-orig-value="{{$status}}" data-status-name="{{__(\'lang_v1.\' . $status)}}"><span class="label @payment_status($status)">{{__(\'lang_v1.\' . $status)}}
+                    /* return '<a href="{{ action("TransactionPaymentController@show", [$row->id])}}" class="view_payment_modal payment-status payment-status-label" data-orig-value="{{$status}}" data-status-name="{{__(\'lang_v1.\' . $status)}}"><span class="label @payment_status($status)">{{__(\'lang_v1.\' . $status)}}
                         </span></a>';*/
 
-                       return $status;
+                    return $status;
                 })
                 ->addColumn('payment_due', function ($row) {
                     $due = $this->checkPayment($row->id);
-                   // $due = $row->final_total - $row->amount_paid;
-                    $due_html = '<strong>' . __('lang_v1.purchase') .':</strong> <span class="display_currency payment_due" data-currency_symbol="true" data-orig-value="' . $due . '">' . $due . '</span>';
+                    // $due = $row->final_total - $row->amount_paid;
+                    $due_html = '<strong>' . __('lang_v1.purchase') . ':</strong> <span class="display_currency payment_due" data-currency_symbol="true" data-orig-value="' . $due . '">' . $due . '</span>';
 
-                    if(!empty($row->return_exists)){
+                    if (!empty($row->return_exists)) {
                         $return_due = $row->amount_return - $row->return_paid;
-                        $due_html .= '<br><strong>' . __('lang_v1.purchase_return') .':</strong> <a href="' . action("TransactionPaymentController@show", [$row->return_transaction_id]) . '" class="view_purchase_return_payment_modal"><span class="display_currency" data-currency_symbol="true" data-orig-value="' . $return_due . '">' . $return_due . '</span></a>';
+                        $due_html .= '<br><strong>' . __('lang_v1.purchase_return') . ':</strong> <a href="' . action("TransactionPaymentController@show", [$row->return_transaction_id]) . '" class="view_purchase_return_payment_modal"><span class="display_currency" data-currency_symbol="true" data-orig-value="' . $return_due . '">' . $return_due . '</span></a>';
                     }
                     return $due_html;
                 })
                 ->setRowAttr([
                     'data-href' => function ($row) {
                         if (auth()->user()->can("purchase.view")) {
-                            return  action('PurchaseController@show', [$row->id]) ;
+                            return  action('PurchaseController@show', [$row->id]);
                         } else {
                             return '';
                         }
-                    }])
+                    }
+                ])
                 ->rawColumns(['final_total', 'action', 'payment_due', 'payment_status', 'status', 'ref_no'])
                 ->make(true);
         }
@@ -253,9 +256,9 @@ class PurchaseController extends Controller
     {
         $transaction = Transaction::findOrFail($transaction_id);
 
-        $getpayments = TransactionPayment::where('transaction_id',$transaction_id)
-                                      ->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
-        if($transaction->is_hutang_piutang == 1){
+        $getpayments = TransactionPayment::where('transaction_id', $transaction_id)
+            ->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
+        if ($transaction->is_hutang_piutang == 1) {
 
             $getpayments->whereRaw("LEFT(id_rekening_debit,2) != 51");
         }
@@ -279,7 +282,7 @@ class PurchaseController extends Controller
         }
 
         $taxes = TaxRate::where('business_id', $business_id)
-                            ->get();
+            ->get();
         $orderStatuses = $this->productUtil->orderStatuses();
         $business_locations = BusinessLocation::forDropdown($business_id);
 
@@ -311,15 +314,15 @@ class PurchaseController extends Controller
 
         //Accounts
         $accounts = $this->moduleUtil->accountsDropdown($business_id, true);
-        
+
         $default_datetime = $this->businessUtil->format_date('now', true);
         //ref_no
         $ref_type = 'purchase';
         $ref_count = $this->productUtil->setAndGetReferenceCount($ref_type);
         $ref_no = $this->productUtil->generateReferenceNumber($ref_type, $ref_count);
 
-        return view ('purchase.create')
-            ->with(compact('taxes', 'orderStatuses', 'business_locations', 'currency_details', 'default_purchase_status', 'customer_groups', 'types', 'shortcuts', 'payment_line', 'payment_types', 'accounts','price_groups', 'ref_no', 'default_datetime'));
+        return view('purchase.create')
+            ->with(compact('taxes', 'orderStatuses', 'business_locations', 'currency_details', 'default_purchase_status', 'customer_groups', 'types', 'shortcuts', 'payment_line', 'payment_types', 'accounts', 'price_groups', 'ref_no', 'default_datetime'));
     }
 
     /**
@@ -330,11 +333,11 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         if (!auth()->user()->can('purchase.create')) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $payment_override = array();
 
         // dd($request->bayar);
@@ -344,86 +347,88 @@ class PurchaseController extends Controller
         $is_hutang_piutang = $request->is_hutang_piutang;
 
         // $amount = $this->transactionUtil->num_uf($request->payment[0]['amount']);
-        
-        if($bayar < 0 ){
+
+        if ($bayar < 0) {
             $is_hutang_piutang = 1;
             $bayar_purchase = 0;
-        }else{
+        } else {
             $bayar_purchase = $bayar;
         }
 
         // dd($bayar_purchase);
-      
+
         $payment_override = [
-                              [   "amount" => $bayar_purchase - $request->shipping_charges,
-                                  "method" => $request->payment[0]['method'],
-                                  "card_number" => $request->payment[0]['card_number'],
-                                  "card_holder_name" => $request->payment[0]['card_holder_name'],
-                                  "card_transaction_number" => $request->payment[0]['card_transaction_number'],
-                                  "card_type" => $request->payment[0]['card_type'],
-                                  "card_month" => $request->payment[0]['card_month'],
-                                  "card_year" => $request->payment[0]['card_year'],
-                                  "card_security" => $request->payment[0]['card_security'],
-                                  "cheque_number" => $request->payment[0]['cheque_number'],
-                                  "bank_account_number" => $request->payment[0]['bank_account_number'],
-                                  "transaction_no_1" => $request->payment[0]['transaction_no_1'],
-                                  "transaction_no_2" => $request->payment[0]['transaction_no_2'],
-                                  "transaction_no_3" => $request->payment[0]['transaction_no_3'],
-                                  "note" => $request->payment[0]['note'],
-                                  "rek_type"=>"pembelian"
-                              ]
-                          ]; 
+            [
+                "amount" => $bayar_purchase - $request->shipping_charges,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "rek_type" => "pembelian"
+            ]
+        ];
         // dd($payment_override);
 
-        if($request->shipping_charges > 0){
-        
-            $shipping_charges = [     "amount" => $request->shipping_charges,
-                                      "method" => $request->payment[0]['method'],
-                                      "card_number" => $request->payment[0]['card_number'],
-                                      "card_holder_name" => $request->payment[0]['card_holder_name'],
-                                      "card_transaction_number" => $request->payment[0]['card_transaction_number'],
-                                      "card_type" => $request->payment[0]['card_type'],
-                                      "card_month" => $request->payment[0]['card_month'],
-                                      "card_year" => $request->payment[0]['card_year'],
-                                      "card_security" => $request->payment[0]['card_security'],
-                                      "cheque_number" => $request->payment[0]['cheque_number'],
-                                      "bank_account_number" => $request->payment[0]['bank_account_number'],
-                                      "transaction_no_1" => $request->payment[0]['transaction_no_1'],
-                                      "transaction_no_2" => $request->payment[0]['transaction_no_2'],
-                                      "transaction_no_3" => $request->payment[0]['transaction_no_3'],
-                                      "note" => $request->payment[0]['note'],
-                                      "rek_type"=>"biaya_kirim"
-                                      ];
-                                     
+        if ($request->shipping_charges > 0) {
+
+            $shipping_charges = [
+                "amount" => $request->shipping_charges,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "rek_type" => "biaya_kirim"
+            ];
+
             array_push($payment_override, $shipping_charges);
-            if($request->payment[0]['amount'] >= $request->shipping_charges){
-                    //kalau hutang
-                    $sisa = $this->productUtil->num_uf($request->final_total) - ($request->payment[0]['amount']);
-                   
-                    if($sisa > 0){
-                        $shipping_charges_payment = [     "amount" => $request->shipping_charges,
-                                              "method" => $request->payment[0]['method'],
-                                              "card_number" => $request->payment[0]['card_number'],
-                                              "card_holder_name" => $request->payment[0]['card_holder_name'],
-                                              "card_transaction_number" => $request->payment[0]['card_transaction_number'],
-                                              "card_type" => $request->payment[0]['card_type'],
-                                              "card_month" => $request->payment[0]['card_month'],
-                                              "card_year" => $request->payment[0]['card_year'],
-                                              "card_security" => $request->payment[0]['card_security'],
-                                              "cheque_number" => $request->payment[0]['cheque_number'],
-                                              "bank_account_number" => $request->payment[0]['bank_account_number'],
-                                              "transaction_no_1" => $request->payment[0]['transaction_no_1'],
-                                              "transaction_no_2" => $request->payment[0]['transaction_no_2'],
-                                              "transaction_no_3" => $request->payment[0]['transaction_no_3'],
-                                              "note" => $request->payment[0]['note'],
-                                              "rek_type"=>"pembayaran_biaya_kirim"
-                                              ];
-                    
-                        array_push($payment_override, $shipping_charges_payment); 
-                    }
-                       
+            if ($request->payment[0]['amount'] >= $request->shipping_charges) {
+                //kalau hutang
+                $sisa = $this->productUtil->num_uf($request->final_total) - ($request->payment[0]['amount']);
+
+                if ($sisa > 0) {
+                    $shipping_charges_payment = [
+                        "amount" => $request->shipping_charges,
+                        "method" => $request->payment[0]['method'],
+                        "card_number" => $request->payment[0]['card_number'],
+                        "card_holder_name" => $request->payment[0]['card_holder_name'],
+                        "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                        "card_type" => $request->payment[0]['card_type'],
+                        "card_month" => $request->payment[0]['card_month'],
+                        "card_year" => $request->payment[0]['card_year'],
+                        "card_security" => $request->payment[0]['card_security'],
+                        "cheque_number" => $request->payment[0]['cheque_number'],
+                        "bank_account_number" => $request->payment[0]['bank_account_number'],
+                        "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                        "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                        "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                        "note" => $request->payment[0]['note'],
+                        "rek_type" => "pembayaran_biaya_kirim"
+                    ];
+
+                    array_push($payment_override, $shipping_charges_payment);
                 }
-       // dd($payment_override);
+            }
+            // dd($payment_override);
         }
         try {
             $business_id = $request->session()->get('user.business_id');
@@ -433,7 +438,7 @@ class PurchaseController extends Controller
                 return $this->moduleUtil->expiredResponse(action('PurchaseController@index'));
             }
 
-            $transaction_data = $request->only([ 'ref_no', 'status', 'contact_id', 'transaction_date', 'total_before_tax', 'location_id','discount_type', 'discount_amount','tax_id', 'tax_amount', 'shipping_details', 'shipping_charges', 'final_total', 'additional_notes', 'exchange_rate']);
+            $transaction_data = $request->only(['ref_no', 'status', 'contact_id', 'transaction_date', 'total_before_tax', 'location_id', 'discount_type', 'discount_amount', 'tax_id', 'tax_amount', 'shipping_details', 'shipping_charges', 'final_total', 'additional_notes', 'exchange_rate']);
 
             $exchange_rate = $transaction_data['exchange_rate'];
 
@@ -449,7 +454,7 @@ class PurchaseController extends Controller
                 'total_before_tax' => 'required',
                 'location_id' => 'required',
                 'final_total' => 'required',
-                'document' => 'file|max:'. (config('constants.document_size_limit') / 1000)
+                'document' => 'file|max:' . (config('constants.document_size_limit') / 1000)
             ]);
 
             $user_id = $request->session()->get('user.id');
@@ -459,14 +464,14 @@ class PurchaseController extends Controller
             Business::update_business($business_id, ['p_exchange_rate' => ($transaction_data['exchange_rate'])]);
 
             $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
-            
+
             //unformat input values
-            $tot_before_tax = $this->productUtil->num_uf($transaction_data['total_before_tax'], $currency_details)*$exchange_rate;
+            $tot_before_tax = $this->productUtil->num_uf($transaction_data['total_before_tax'], $currency_details) * $exchange_rate;
             $transaction_data['total_before_tax'] = "$tot_before_tax";
 
             // If discount type is fixed them multiply by exchange rate, else don't
             if ($transaction_data['discount_type'] == 'fixed') {
-                $fx = $this->productUtil->num_uf($transaction_data['discount_amount'], $currency_details)*$exchange_rate;
+                $fx = $this->productUtil->num_uf($transaction_data['discount_amount'], $currency_details) * $exchange_rate;
                 $transaction_data['discount_amount'] = "$fx";
             } elseif ($transaction_data['discount_type'] == 'percentage') {
                 $prc = $this->productUtil->num_uf($transaction_data['discount_amount'], $currency_details);
@@ -474,15 +479,15 @@ class PurchaseController extends Controller
             } else {
                 $transaction_data['discount_amount'] = 0;
             }
-            
-            
-            
-            $tax_amount = $this->productUtil->num_uf($transaction_data['tax_amount'], $currency_details)*$exchange_rate;
+
+
+
+            $tax_amount = $this->productUtil->num_uf($transaction_data['tax_amount'], $currency_details) * $exchange_rate;
             $transaction_data['tax_amount'] = "$tax_amount";
-            
-            $transaction_data['shipping_charges'] = $this->productUtil->num_uf($transaction_data['shipping_charges'], $currency_details)*$exchange_rate;
-            
-            $fintot_conv = $this->productUtil->num_uf($transaction_data['final_total'], $currency_details)*$exchange_rate;
+
+            $transaction_data['shipping_charges'] = $this->productUtil->num_uf($transaction_data['shipping_charges'], $currency_details) * $exchange_rate;
+
+            $fintot_conv = $this->productUtil->num_uf($transaction_data['final_total'], $currency_details) * $exchange_rate;
             $transaction_data['final_total'] = "$fintot_conv";
 
             $transaction_data['business_id'] = $business_id;
@@ -499,7 +504,7 @@ class PurchaseController extends Controller
                     $transaction_data['document'] = str_replace('public/documents/', '', $path);
                 }
             }
-            
+
             DB::beginTransaction();
 
             //Update reference count
@@ -514,27 +519,27 @@ class PurchaseController extends Controller
             $purchase_lines = [];
             $purchases = $request->input('purchases');
             foreach ($purchases as $purchase) {
-                $item_tax = $this->productUtil->num_uf($purchase['item_tax'], $currency_details)*$exchange_rate;
-                $purchase_price_inc_tax = $this->productUtil->num_uf($purchase['purchase_price_inc_tax'], $currency_details)*$exchange_rate;
+                $item_tax = $this->productUtil->num_uf($purchase['item_tax'], $currency_details) * $exchange_rate;
+                $purchase_price_inc_tax = $this->productUtil->num_uf($purchase['purchase_price_inc_tax'], $currency_details) * $exchange_rate;
 
                 $new_purchase_line = [
-                'product_id' => $purchase['product_id'],
-                'variation_id' => $purchase['variation_id'],
-                'quantity'=> $this->productUtil->num_uf($purchase['quantity'], $currency_details),
-                'pp_without_discount' => $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details)*$exchange_rate,
-                'discount_percent' => $this->productUtil->num_uf($purchase['discount_percent'], $currency_details),
-                'purchase_price' => $this->productUtil->num_uf($purchase['purchase_price'], $currency_details)*$exchange_rate,
-                'item_tax' => "$item_tax",
-                'tax_id' => $purchase['purchase_line_tax_id'],
-                'purchase_price_inc_tax' => "$purchase_price_inc_tax",
-                'lot_number' => !empty($purchase['lot_number']) ? $purchase['lot_number'] : null
+                    'product_id' => $purchase['product_id'],
+                    'variation_id' => $purchase['variation_id'],
+                    'quantity' => $this->productUtil->num_uf($purchase['quantity'], $currency_details),
+                    'pp_without_discount' => $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details) * $exchange_rate,
+                    'discount_percent' => $this->productUtil->num_uf($purchase['discount_percent'], $currency_details),
+                    'purchase_price' => $this->productUtil->num_uf($purchase['purchase_price'], $currency_details) * $exchange_rate,
+                    'item_tax' => "$item_tax",
+                    'tax_id' => $purchase['purchase_line_tax_id'],
+                    'purchase_price_inc_tax' => "$purchase_price_inc_tax",
+                    'lot_number' => !empty($purchase['lot_number']) ? $purchase['lot_number'] : null
                 ];
 
                 if (!empty($purchase['mfg_date'])) {
                     $new_purchase_line['mfg_date'] = $this->productUtil->uf_date($purchase['mfg_date']);
                 }
                 if (!empty($purchase['exp_date'])) {
-                    $new_purchase_line['exp_date'] =$this->productUtil->uf_date($purchase['exp_date']);
+                    $new_purchase_line['exp_date'] = $this->productUtil->uf_date($purchase['exp_date']);
                 }
 
                 $purchase_lines[] = $new_purchase_line;
@@ -551,32 +556,33 @@ class PurchaseController extends Controller
                     $this->productUtil->updateProductQuantity($transaction_data['location_id'], $purchase['product_id'], $purchase['variation_id'], $purchase['quantity']);
                 }
                 //Add Purchase payments
-                 $ttl_payment = array_sum(array_column($payment_override, 'amount'));
-                
-                if($ttl_payment > 0){
+                $ttl_payment = array_sum(array_column($payment_override, 'amount'));
+
+                if ($ttl_payment > 0) {
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment_override/*$request->input('payment')*/);
                 }
                 //update payment status
-                $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total, $transaction->shipping_charges,'purchase');
-
+                $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total, $transaction->shipping_charges, 'purchase');
             }
 
             if (!empty($purchase_lines)) {
                 $transaction->purchase_lines()->createMany($purchase_lines);
             }
-            
+
             DB::commit();
-            
-            $output = ['success' => 1,
-                            'msg' => __('purchase.purchase_add_success')
-                        ];
+
+            $output = [
+                'success' => 1,
+                'msg' => __('purchase.purchase_add_success')
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => 0,
-                            'msg' => __('messages.something_went_wrong')
-                        ];
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => 0,
+                'msg' => __('messages.something_went_wrong')
+            ];
         }
 
         return redirect('purchases')->with('status', $output);
@@ -596,34 +602,34 @@ class PurchaseController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $taxes = TaxRate::where('business_id', $business_id)
-                            ->pluck('name', 'id');
-                            
-        $is_hutang_piutang = Transaction::select('is_hutang_piutang')->where('id',$id)->first()->is_hutang_piutang;
-    
+            ->pluck('name', 'id');
+
+        $is_hutang_piutang = Transaction::select('is_hutang_piutang')->where('id', $id)->first()->is_hutang_piutang;
+
         $purchase = Transaction::where('business_id', $business_id)
-                                ->where('id', $id)
-                                ->with(
-                                    'contact',
-                                    'purchase_lines.product',
-                                    'purchase_lines.variations',
-                                    'purchase_lines.variations.product_variation',
-                                    'location',
-                                    'tax'
-                                )
-                                ->with('purchase_lines')
-                                ->with(array('payment_lines'=>function($query)use($is_hutang_piutang){
-                                     $query->leftJoin('rekening','transaction_payments.id_rekening_debit','=','rekening.kd_rekening');
-                                     $query->groupBy('transaction_id');
-                                    if($is_hutang_piutang == 1){
-                                        $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
-                                    }
-                                }))
-                                ->first();
+            ->where('id', $id)
+            ->with(
+                'contact',
+                'purchase_lines.product',
+                'purchase_lines.variations',
+                'purchase_lines.variations.product_variation',
+                'location',
+                'tax'
+            )
+            ->with('purchase_lines')
+            ->with(array('payment_lines' => function ($query) use ($is_hutang_piutang) {
+                $query->leftJoin('rekening', 'transaction_payments.id_rekening_debit', '=', 'rekening.kd_rekening');
+                // $query->groupBy('transaction_id');
+                if ($is_hutang_piutang == 1) {
+                    $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
+                }
+            }))
+            ->first();
 
         $payment_methods = $this->productUtil->payment_types();
 
         $purchase_taxes = [];
-        if(!empty($purchase->tax)){
+        if (!empty($purchase->tax)) {
             if ($purchase->tax->is_tax_group) {
                 $purchase_taxes = $this->transactionUtil->sumGroupTaxDetails($this->transactionUtil->groupTaxDetails($purchase->tax, $purchase->tax_amount));
             } else {
@@ -631,6 +637,7 @@ class PurchaseController extends Controller
             }
         }
 
+        dd($purchase);
         return view('purchase.show')->with(compact('taxes', 'purchase', 'payment_methods', 'purchase_taxes'));
     }
 
@@ -662,9 +669,11 @@ class PurchaseController extends Controller
         // }
 
         //Check if return exist then not allowed
-        if($this->transactionUtil->isReturnExist($id)){
-            return back()->with('status', ['success' => 0,
-                    'msg' => __('lang_v1.return_exist')]);
+        if ($this->transactionUtil->isReturnExist($id)) {
+            return back()->with('status', [
+                'success' => 0,
+                'msg' => __('lang_v1.return_exist')
+            ]);
         }
 
         $business = Business::find($business_id);
@@ -672,21 +681,21 @@ class PurchaseController extends Controller
         $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
 
         $taxes = TaxRate::where('business_id', $business_id)
-                            ->get();
+            ->get();
         $purchase = Transaction::where('business_id', $business_id)
-                    ->where('id', $id)
-                    ->with(
-                        'contact',
-                        'purchase_lines',
-                        'purchase_lines.product',
-                        'purchase_lines.product.unit',
-                        'purchase_lines.variations',
-                        'purchase_lines.variations.product_variation',
-                        'location'
-                    )
-                    ->first();
+            ->where('id', $id)
+            ->with(
+                'contact',
+                'purchase_lines',
+                'purchase_lines.product',
+                'purchase_lines.product.unit',
+                'purchase_lines.variations',
+                'purchase_lines.variations.product_variation',
+                'location'
+            )
+            ->first();
         $taxes = TaxRate::where('business_id', $business_id)
-                            ->get();
+            ->get();
         $orderStatuses = $this->productUtil->orderStatuses();
 
         $business_locations = BusinessLocation::forDropdown($business_id);
@@ -707,7 +716,7 @@ class PurchaseController extends Controller
             $types['both'] = __('lang_v1.both_supplier_customer');
         }
         $customer_groups = CustomerGroup::forDropdown($business_id);
-         $price_groups = SellingPriceGroup::forDropdown($business_id);
+        $price_groups = SellingPriceGroup::forDropdown($business_id);
         $business_details = $this->businessUtil->getDetails($business_id);
         $shortcuts = json_decode($business_details->keyboard_shortcuts, true);
 
@@ -744,19 +753,19 @@ class PurchaseController extends Controller
         try {
             //Validate document size
             $request->validate([
-                'document' => 'file|max:'. (config('constants.document_size_limit') / 1000)
+                'document' => 'file|max:' . (config('constants.document_size_limit') / 1000)
             ]);
 
             $transaction = Transaction::with('payment_lines')->findOrFail($id);
             $before_status = $transaction->status;
             $sts_pay_bfr = $transaction->payment_status;
 
-            if($request->status == 'received' && $before_status != 'received' && $sts_pay_bfr != 'paid'){
+            if ($request->status == 'received' && $before_status != 'received' && $sts_pay_bfr != 'paid') {
                 foreach ($transaction->payment_lines as $payment) {
-                    $accountNum = $this->transactionUtil->accountNumbering($transaction->type,$payment['method']);
+                    $accountNum = $this->transactionUtil->accountNumbering($transaction->type, $payment['method']);
 
                     $c_payment = TransactionPayment::find($payment['id']);
-                    $c_payment->id_jenis_buku = $accountNum['kd_jenis_buku']; 
+                    $c_payment->id_jenis_buku = $accountNum['kd_jenis_buku'];
                     $c_payment->id_rekening   = $accountNum['kd_rekening'];
                     $c_payment->save();
                 }
@@ -767,12 +776,14 @@ class PurchaseController extends Controller
 
             $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
 
-            $update_data = $request->only([ 'ref_no', 'status', 'contact_id',
-                            'transaction_date', 'total_before_tax',
-                            'discount_type', 'discount_amount', 'tax_id',
-                            'tax_amount', 'shipping_details',
-                            'shipping_charges', 'final_total',
-                            'additional_notes', 'exchange_rate']);
+            $update_data = $request->only([
+                'ref_no', 'status', 'contact_id',
+                'transaction_date', 'total_before_tax',
+                'discount_type', 'discount_amount', 'tax_id',
+                'tax_amount', 'shipping_details',
+                'shipping_charges', 'final_total',
+                'additional_notes', 'exchange_rate'
+            ]);
 
             $exchange_rate = $update_data['exchange_rate'];
 
@@ -831,19 +842,19 @@ class PurchaseController extends Controller
                     $purchase_line = PurchaseLine::findOrFail($purchase['purchase_line_id']);
                     $updated_purchase_line_ids[] = $purchase_line->id;
                     $old_qty = $this->productUtil->num_f($purchase_line->quantity);
-                    
+
                     //Update quantity for existing products
                     if ($before_status == 'received' && $transaction->status == 'received') {
-                     //if status received update existing quantity
+                        //if status received update existing quantity
                         $this->productUtil->updateProductQuantity($transaction->location_id, $purchase['product_id'], $purchase['variation_id'], $purchase['quantity'], $old_qty, $currency_details);
                     } elseif ($before_status == 'received' && $transaction->status != 'received') {
                         //decrease quantity only if status changed from received to not received
-                            $this->productUtil->decreaseProductQuantity(
-                                $purchase['product_id'],
-                                $purchase['variation_id'],
-                                $transaction->location_id,
-                                $purchase_line->quantity
-                            );
+                        $this->productUtil->decreaseProductQuantity(
+                            $purchase['product_id'],
+                            $purchase['variation_id'],
+                            $transaction->location_id,
+                            $purchase_line->quantity
+                        );
                     } elseif ($before_status != 'received' && $transaction->status == 'received') {
                         $this->productUtil->updateProductQuantity($transaction->location_id, $purchase['product_id'], $purchase['variation_id'], $purchase['quantity'], 0, $currency_details);
                     }
@@ -860,25 +871,25 @@ class PurchaseController extends Controller
                 }
 
                 $purchase_line->quantity = $this->productUtil->num_uf($purchase['quantity'], $currency_details);
-                $purchase_line->pp_without_discount = $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details)*$exchange_rate;
+                $purchase_line->pp_without_discount = $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details) * $exchange_rate;
                 $purchase_line->discount_percent = $this->productUtil->num_uf($purchase['discount_percent'], $currency_details);
-                $purchase_line->purchase_price = $this->productUtil->num_uf($purchase['purchase_price'], $currency_details)*$exchange_rate;
-                $purchase_line->purchase_price_inc_tax = $this->productUtil->num_uf($purchase['purchase_price_inc_tax'], $currency_details)*$exchange_rate;
-                $purchase_line->item_tax = $this->productUtil->num_uf($purchase['item_tax'], $currency_details)*$exchange_rate;
+                $purchase_line->purchase_price = $this->productUtil->num_uf($purchase['purchase_price'], $currency_details) * $exchange_rate;
+                $purchase_line->purchase_price_inc_tax = $this->productUtil->num_uf($purchase['purchase_price_inc_tax'], $currency_details) * $exchange_rate;
+                $purchase_line->item_tax = $this->productUtil->num_uf($purchase['item_tax'], $currency_details) * $exchange_rate;
                 $purchase_line->tax_id = $purchase['purchase_line_tax_id'];
                 $purchase_line->lot_number = !empty($purchase['lot_number']) ? $purchase['lot_number'] : null;
                 $purchase_line->mfg_date = !empty($purchase['mfg_date']) ? $this->productUtil->uf_date($purchase['mfg_date']) : null;
                 $purchase_line->exp_date = !empty($purchase['exp_date']) ? $this->productUtil->uf_date($purchase['exp_date']) : null;
-                
+
                 $updated_purchase_lines[] = $purchase_line;
 
                 //Edit product price
                 if ($enable_product_editing == 1) {
                     $variation_data['default_sell_price'] = $this->productUtil->num_uf($purchase['default_sell_price'], $currency_details);
-                    $variation_data['pp_without_discount'] = $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details)*$exchange_rate;
+                    $variation_data['pp_without_discount'] = $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details) * $exchange_rate;
                     $variation_data['variation_id'] = $purchase_line->variation_id;
                     $variation_data['purchase_price'] = $purchase_line->purchase_price;
-                     
+
                     $this->productUtil->updateProductFromPurchase($variation_data);
                 }
             }
@@ -887,10 +898,10 @@ class PurchaseController extends Controller
             $delete_purchase_line_ids = [];
             if (!empty($updated_purchase_line_ids)) {
                 $delete_purchase_lines = PurchaseLine::where('transaction_id', $transaction->id)
-                            ->whereNotIn('id', $updated_purchase_line_ids)
-                            ->get();
+                    ->whereNotIn('id', $updated_purchase_line_ids)
+                    ->get();
 
-                if($delete_purchase_lines->count()) {
+                if ($delete_purchase_lines->count()) {
                     foreach ($delete_purchase_lines as $delete_purchase_line) {
                         $delete_purchase_line_ids[] = $delete_purchase_line->id;
 
@@ -906,8 +917,8 @@ class PurchaseController extends Controller
                     }
                     //Delete deleted purchase lines
                     PurchaseLine::where('transaction_id', $transaction->id)
-                                ->whereIn('id', $delete_purchase_line_ids)
-                                ->delete();
+                        ->whereIn('id', $delete_purchase_line_ids)
+                        ->delete();
                 }
             }
 
@@ -921,17 +932,18 @@ class PurchaseController extends Controller
 
             DB::commit();
 
-            $output = ['success' => 1,
-                            'msg' => __('purchase.purchase_update_success')
-                        ];
-
+            $output = [
+                'success' => 1,
+                'msg' => __('purchase.purchase_update_success')
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => 0,
-                            'msg' => $e->getMessage()
-                        ];
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => 0,
+                'msg' => $e->getMessage()
+            ];
             return back()->with('status', $output);
         }
 
@@ -955,18 +967,18 @@ class PurchaseController extends Controller
                 $business_id = request()->session()->get('user.business_id');
 
                 //Check if return exist then not allowed
-                if($this->transactionUtil->isReturnExist($id)){
+                if ($this->transactionUtil->isReturnExist($id)) {
                     $output = [
                         'success' => false,
                         'msg' => __('lang_v1.return_exist')
                     ];
                     return $output;
                 }
-        
+
                 $transaction = Transaction::where('id', $id)
-                                ->where('business_id', $business_id)
-                                ->with(['purchase_lines'])
-                                ->first();
+                    ->where('business_id', $business_id)
+                    ->with(['purchase_lines'])
+                    ->first();
                 $delete_purchase_lines = $transaction->purchase_lines;
                 DB::beginTransaction();
 
@@ -986,34 +998,36 @@ class PurchaseController extends Controller
                         );
                     }
                     PurchaseLine::where('transaction_id', $transaction->id)
-                                ->whereIn('id', $delete_purchase_line_ids)
-                                ->delete();
+                        ->whereIn('id', $delete_purchase_line_ids)
+                        ->delete();
 
                     //Update mapping of purchase & Sell.
                     $this->transactionUtil->adjustMappingPurchaseSellAfterEditingPurchase($transaction_status, $transaction, $delete_purchase_lines);
                 }
 
-                    //Delete Transaction
-                    $transaction->delete();
+                //Delete Transaction
+                $transaction->delete();
 
                 DB::commit();
 
-                $output = ['success' => true,
-                            'msg' => __('lang_v1.purchase_delete_success')
-                        ];
+                $output = [
+                    'success' => true,
+                    'msg' => __('lang_v1.purchase_delete_success')
+                ];
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
-                            'msg' => $e->getMessage()
-                        ];
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => $e->getMessage()
+            ];
         }
 
         return $output;
     }
-    
+
     /**
      * Retrieves supliers list.
      *
@@ -1033,18 +1047,18 @@ class PurchaseController extends Controller
             $query = Contact::where('business_id', $business_id);
 
             $selected_contacts = User::isSelectedContacts($user_id);
-            if($selected_contacts){
+            if ($selected_contacts) {
                 $query->join('user_contact_access AS uca', 'contacts.id', 'uca.contact_id')
-                ->where('uca.user_id', $user_id);
+                    ->where('uca.user_id', $user_id);
             }
             $suppliers = $query->where(function ($query) use ($term) {
-                            $query->where('name', 'like', '%' . $term .'%')
-                                ->orWhere('supplier_business_name', 'like', '%' . $term .'%')
-                                ->orWhere('contacts.contact_id', 'like', '%' . $term .'%');
-                        })
-                        ->select('contacts.id', 'name as text', 'supplier_business_name as business_name')
-                        ->onlySuppliers()
-                        ->get();
+                $query->where('name', 'like', '%' . $term . '%')
+                    ->orWhere('supplier_business_name', 'like', '%' . $term . '%')
+                    ->orWhere('contacts.contact_id', 'like', '%' . $term . '%');
+            })
+                ->select('contacts.id', 'name as text', 'supplier_business_name as business_name')
+                ->onlySuppliers()
+                ->get();
             return json_encode($suppliers);
         }
     }
@@ -1076,9 +1090,9 @@ class PurchaseController extends Controller
                 'variations.product_id'
             )
                 ->where(function ($query) use ($term) {
-                    $query->where('products.name', 'like', '%' . $term .'%');
-                    $query->orWhere('sku', 'like', '%' . $term .'%');
-                    $query->orWhere('sub_sku', 'like', '%' . $term .'%');
+                    $query->where('products.name', 'like', '%' . $term . '%');
+                    $query->orWhere('sku', 'like', '%' . $term . '%');
+                    $query->orWhere('sub_sku', 'like', '%' . $term . '%');
                 })
                 ->where('business_id', $business_id)
                 ->whereNull('variations.deleted_at')
@@ -1097,18 +1111,18 @@ class PurchaseController extends Controller
                 $q->where('enable_stock', 1);
             }
             $products = $q->get();
-                
+
             $products_array = [];
             foreach ($products as $product) {
                 $products_array[$product->product_id]['name'] = $product->name;
                 $products_array[$product->product_id]['sku'] = $product->sub_sku;
                 $products_array[$product->product_id]['type'] = $product->type;
                 $products_array[$product->product_id]['variations'][]
-                = [
+                    = [
                         'variation_id' => $product->variation_id,
                         'variation_name' => $product->variation,
                         'sub_sku' => $product->sub_sku
-                        ];
+                    ];
             }
 
             $result = [];
@@ -1117,11 +1131,12 @@ class PurchaseController extends Controller
             if (!empty($products_array)) {
                 foreach ($products_array as $key => $value) {
                     if ($no_of_records > 1 && $value['type'] != 'single') {
-                        $result[] = [ 'id' => $i,
-                                    'text' => $value['name'] . ' - ' . $value['sku'],
-                                    'variation_id' => 0,
-                                    'product_id' => $key
-                                ];
+                        $result[] = [
+                            'id' => $i,
+                            'text' => $value['name'] . ' - ' . $value['sku'],
+                            'variation_id' => 0,
+                            'product_id' => $key
+                        ];
                     }
                     $name = $value['name'];
                     foreach ($value['variations'] as $variation) {
@@ -1130,20 +1145,21 @@ class PurchaseController extends Controller
                             $text = $text . ' (' . $variation['variation_name'] . ')';
                         }
                         $i++;
-                        $result[] = [ 'id' => $i,
-                                            'text' => $text . ' - ' . $variation['sub_sku'],
-                                            'product_id' => $key ,
-                                            'variation_id' => $variation['variation_id'],
-                                        ];
+                        $result[] = [
+                            'id' => $i,
+                            'text' => $text . ' - ' . $variation['sub_sku'],
+                            'product_id' => $key,
+                            'variation_id' => $variation['variation_id'],
+                        ];
                     }
                     $i++;
                 }
             }
-            
+
             return json_encode($result);
         }
     }
-    
+
     /**
      * Retrieves products list.
      *
@@ -1166,19 +1182,19 @@ class PurchaseController extends Controller
             if (!empty($product_id)) {
                 $row_count = $request->input('row_count');
                 $product = Product::where('id', $product_id)
-                                    ->with(['unit'])
-                                    ->first();
+                    ->with(['unit'])
+                    ->first();
 
                 $query = Variation::where('product_id', $product_id)
-                                        ->with(['product_variation']);
+                    ->with(['product_variation']);
                 if ($variation_id !== '0') {
                     $query->where('id', $variation_id);
                 }
 
                 $variations =  $query->get();
-                
+
                 $taxes = TaxRate::where('business_id', $business_id)
-                            ->get();
+                    ->get();
 
                 return view('purchase.partials.purchase_entry_row')
                     ->with(compact(
@@ -1193,7 +1209,7 @@ class PurchaseController extends Controller
             }
         }
     }
-    
+
     /**
      * Checks if ref_number and supplier combination already exists.
      *
@@ -1212,8 +1228,8 @@ class PurchaseController extends Controller
         if (!empty($contact_id) && !empty($ref_no)) {
             //check in transactions table
             $query = Transaction::where('business_id', $business_id)
-                            ->where('ref_no', $ref_no)
-                            ->where('contact_id', $contact_id);
+                ->where('ref_no', $ref_no)
+                ->where('contact_id', $contact_id);
             if (!empty($purchase_id)) {
                 $query->where('id', '!=', $purchase_id);
             }
@@ -1228,7 +1244,8 @@ class PurchaseController extends Controller
         }
     }
 
-    public function changeStatus($id){
+    public function changeStatus($id)
+    {
         // if (!auth()->user()->can('purchase.create') && !auth()->user()->can('sell.create')) {
         //     abort(403, 'Unauthorized action.');
         // }
@@ -1238,7 +1255,7 @@ class PurchaseController extends Controller
 
         if (request()->ajax()) {
             $transaction = Transaction::where('id', $id)
-                           ->first();
+                ->first();
         }
     }
     /**
@@ -1252,31 +1269,32 @@ class PurchaseController extends Controller
         try {
             $business_id = request()->session()->get('user.business_id');
             $taxes = TaxRate::where('business_id', $business_id)
-                                ->pluck('name', 'id');
+                ->pluck('name', 'id');
             $purchase = Transaction::where('business_id', $business_id)
-                                    ->where('id', $id)
-                                    ->with(
-                                        'contact',
-                                        'purchase_lines',
-                                        'purchase_lines.product',
-                                        'purchase_lines.variations',
-                                        'purchase_lines.variations.product_variation',
-                                        'location'
-                                    )
-                                    ->with(array('payment_lines'=>function($query){
-                                        $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
-                                    }))
-                                    ->first();
+                ->where('id', $id)
+                ->with(
+                    'contact',
+                    'purchase_lines',
+                    'purchase_lines.product',
+                    'purchase_lines.variations',
+                    'purchase_lines.variations.product_variation',
+                    'location'
+                )
+                ->with(array('payment_lines' => function ($query) {
+                    $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
+                }))
+                ->first();
             $payment_methods = $this->productUtil->payment_types();
 
             $output = ['success' => 1, 'receipt' => []];
             $output['receipt']['html_content'] = view('purchase.partials.show_details', compact('taxes', 'purchase', 'payment_methods'))->render();
         } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => 0,
-                            'msg' => __('messages.something_went_wrong')
-                        ];
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => 0,
+                'msg' => __('messages.something_went_wrong')
+            ];
         }
 
         return $output;
