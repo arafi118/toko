@@ -478,10 +478,10 @@ class SellController extends Controller
         }
 
         $business_id = request()->session()->get('user.business_id');
-
         $business_details = $this->businessUtil->getDetails($business_id);
         $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
         $transaction = Transaction::where('business_id', $business_id)
+            ->with('payment_lines')
             ->where('type', 'sell')
             ->findorfail($id);
 

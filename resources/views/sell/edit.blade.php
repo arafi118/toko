@@ -283,6 +283,65 @@
                                     <input type="hidden" name="payment[0][amount]" id="amount_0"
                                         value="{{ @num_format(optional($transaction->tax)->amount) }}"
                                         data-default="{{ $business_details->tax_calculation_amount }}">
+
+                                    @php
+                                        $method = 'cash';
+                                        $card_number = '';
+                                        $card_holder_name = '';
+                                        $card_transaction_number = '';
+                                        $card_type = '';
+                                        $card_month = '';
+                                        $card_year = '';
+                                        $card_security = '';
+                                        $cheque_number = '';
+                                        $bank_account_number = '';
+                                        $transaction_no_1 = '';
+                                        $transaction_no_2 = '';
+                                        $transaction_no_3 = '';
+                                        $note = '';
+                                        foreach ($transaction->payment_lines as $payment_lines) {
+                                            $method = $payment_lines->method;
+                                            $card_number = $payment_lines->card_number;
+                                            $card_holder_name = $payment_lines->card_holder_name;
+                                            $card_transaction_number = $payment_lines->card_transaction_number;
+                                            $card_type = $payment_lines->card_type;
+                                            $card_month = $payment_lines->card_month;
+                                            $card_year = $payment_lines->card_year;
+                                            $card_security = $payment_lines->card_security;
+                                            $cheque_number = $payment_lines->cheque_number;
+                                            $bank_account_number = $payment_lines->bank_account_number;
+                                            $note = $payment_lines->note;
+                                        }
+                                    @endphp
+
+                                    <input type="hidden" name="payment[0][method]" id="method_0"
+                                        value="{{ $method }}">
+                                    <input type="hidden" name="payment[0][card_number]" id="card_number_0"
+                                        value="{{ $card_number }}">
+                                    <input type="hidden" name="payment[0][card_holder_name]" id="card_holder_name_0"
+                                        value="{{ $card_holder_name }}">
+                                    <input type="hidden" name="payment[0][card_transaction_number]"
+                                        id="card_transaction_number_0" value="{{ $card_transaction_number }}">
+                                    <input type="hidden" name="payment[0][card_type]" id="card_type_0"
+                                        value="{{ $card_type }}">
+                                    <input type="hidden" name="payment[0][card_month]" id="card_month_0"
+                                        value="{{ $card_month }}">
+                                    <input type="hidden" name="payment[0][card_year]" id="card_year_0"
+                                        value="{{ $card_year }}">
+                                    <input type="hidden" name="payment[0][card_security]" id="card_security_0"
+                                        value="{{ $card_security }}">
+                                    <input type="hidden" name="payment[0][cheque_number]" id="cheque_number_0"
+                                        value="{{ $cheque_number }}">
+                                    <input type="hidden" name="payment[0][bank_account_number]"
+                                        id="bank_account_number_0" value="{{ $bank_account_number }}">
+                                    <input type="hidden" name="payment[0][transaction_no_1]" id="transaction_no_1_0"
+                                        value="{{ $transaction_no_1 }}">
+                                    <input type="hidden" name="payment[0][transaction_no_2]" id="transaction_no_2_0"
+                                        value="{{ $transaction_no_2 }}">
+                                    <input type="hidden" name="payment[0][transaction_no_3]" id="transaction_no_3_0"
+                                        value="{{ $transaction_no_3 }}">
+                                    <input type="hidden" name="payment[0][note]" id="note_0"
+                                        value="{{ $note }}">
                                 </div>
                             </div>
                         </div>
