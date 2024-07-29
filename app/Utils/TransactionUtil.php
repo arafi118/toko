@@ -1904,8 +1904,8 @@ class TransactionUtil extends Util
                 'transactions.id',
                 'final_total',
                 DB::raw("(final_total - tax_amount) as total_exc_tax"),
-                DB::raw('(SELECT SUM(IF(tp.is_return = 1, -1*tp.amount, tp.amount)) FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit != "515.01") as total_paid'),
-                DB::raw('(SELECT tp.amount FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit = "515.01") as total_discount'),
+                DB::raw('(SELECT SUM(IF(tp.is_return = 1, -1*tp.amount, tp.amount)) FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit NOT LIKE "515%") as total_paid'),
+                DB::raw('(SELECT tp.amount FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit LIKE "515%") as total_discount'),
                 DB::raw('SUM(total_before_tax) as total_before_tax'),
                 'shipping_charges'
             )
