@@ -260,9 +260,10 @@ $trans = new Transaction();
                             @if (count($sell->payment_lines) > 0)
                                 @foreach ($sell->payment_lines as $payment_line)
                                     @php
+                                    $rekening = explode('.',$payment_line->id_rekening_debit)[0];
                                         if (
                                             $payment_line->is_return == 1 ||
-                                            $payment_line->id_rekening_debit == '515.01'
+                                            $rekening == '515'
                                         ) {
                                             $total_paid -= $payment_line->amount;
                                         } else {
@@ -270,14 +271,14 @@ $trans = new Transaction();
                                         }
 
                                         if (
-                                            $payment_line->id_rekening_debit == '515.01' &&
+                                            $rekening == '515' &&
                                             $sell->discount_type == 'percentage'
                                         ) {
                                             $discount = ($sell->discount_amount * $payment_line->amount) / 100;
                                         }
 
                                         if (
-                                            $payment_line->id_rekening_debit == '515.01' &&
+                                            $rekening == '515' &&
                                             $sell->discount_type == 'fixed'
                                         ) {
                                             $discount = $sell->discount_amount;
