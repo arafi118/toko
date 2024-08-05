@@ -804,6 +804,7 @@ class TransactionUtil extends Util
                         'id_rekening_debit'  => $accountNum != null ? $accountNum['kd_rekening_debit'] : null,
                         'id_rekening_kredit'  => $accountNum != null ? $accountNum['kd_rekening_kredit'] : null
                     ];
+
                     if ($payment['method'] == 'custom_pay_1') {
                         $payment_data['transaction_no'] = $payment['transaction_no_1'];
                     } else if ($payment['method'] == 'custom_pay_2') {
@@ -1904,7 +1905,7 @@ class TransactionUtil extends Util
                 'transactions.id',
                 'final_total',
                 DB::raw("(final_total - tax_amount) as total_exc_tax"),
-                DB::raw('(SELECT SUM(IF(tp.is_return = 1, -1*tp.amount, tp.amount)) FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit NOT LIKE "515%") as total_paid'),
+                DB::raw('(SELECT SUM(IF(tp.is_return = 1, -1*tp.amount, tp.amount)) FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit NOT LIKE "515%" AND (transactions.is_hutang_piutang <> 1 OR tp.id_rekening_kredit NOT IN ("131.08", "411.04", "411.02", "131.13", "411.19"))) as total_paid'),
                 DB::raw('(SELECT tp.amount FROM transaction_payments as tp WHERE tp.transaction_id = transactions.id AND tp.id_rekening_debit LIKE "515%") as total_discount'),
                 DB::raw('SUM(total_before_tax) as total_before_tax'),
                 'shipping_charges'
@@ -1914,24 +1915,24 @@ class TransactionUtil extends Util
         //Check for permitted locations of a user
         $permitted_locations = auth()->user()->permitted_locations();
         if ($permitted_locations != 'all') {
-            $query->whereIn('transactions.location_id', $permitted_locations);
+            $query = $query->whereIn('transactions.location_id', $permitted_locations);
         }
 
         if (!empty($start_date) && !empty($end_date)) {
-            $query->whereBetween(DB::raw('date(transaction_date)'), [$start_date, $end_date]);
+            $query = $query->whereBetween(DB::raw('date(transaction_date)'), [$start_date, $end_date]);
         }
 
         if (empty($start_date) && !empty($end_date)) {
-            $query->whereDate('transaction_date', '<=', $end_date);
+            $query = $query->whereDate('transaction_date', '<=', $end_date);
         }
 
         //Filter by the location
         if (!empty($location_id)) {
-            $query->where('transactions.location_id', $location_id);
+            $query = $query->where('transactions.location_id', $location_id);
         }
 
         if (!empty($created_by)) {
-            $query->where('transactions.created_by', $created_by);
+            $query = $query->where('transactions.created_by', $created_by);
         }
 
         $sell_details = $query->get();

@@ -99,8 +99,6 @@ class SellController extends Controller
                     'SR.id as return_transaction_id'
                 );
 
-
-
             $permitted_locations = auth()->user()->permitted_locations();
             if ($permitted_locations != 'all') {
                 $sells->whereIn('transactions.location_id', $permitted_locations);
@@ -226,7 +224,6 @@ class SellController extends Controller
                 )
                 ->addColumn('total_remaining', function ($row) {
                     $total_remaining = $this->checkPayment($row->id);
-                    // $total_remaining =  $row->final_total - $row->total_paid;
                     $total_remaining_html = '<strong>' . __('lang_v1.sell_due') . ':</strong> <span class="display_currency payment_due total-remaining" data-currency_symbol="true" data-orig-value="' . $total_remaining . '">' . $total_remaining . '</span>';
 
                     if (!empty($row->return_exists)) {

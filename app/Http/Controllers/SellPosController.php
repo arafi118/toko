@@ -229,34 +229,19 @@ class SellPosController extends Controller
 
     public function store(Request $request)
     {
-        // var_dump($request)
-        // die;
-        // $input = $request->except('_token');
-        // $proray = $input['products'];
-        // $flattened = array_dot($proray);
-        // $price = array_get($proray, '1.unit_price_inc_tax');
-        // $prod = $request->products;
-        // $upit = array_pluck($proray, 'unit_price_inc_tax');
-        // dd($upit);
-        // dd($prod);
-        // dd($request->input('final_total'));
-        // products[{{$row_count}}][product_id]
-        $products_override = array();
         $sum_laba = 0;
         $sum_harga_pokok = 0;
-        // $session = request()->session()->all();
-        // dd(auth()->user());
-        // dd($business_id);
-        //  $get = $request->all();
-        // dd($get);
+        $products_override = array();
         $date = $request->input('transaction_date');
         $date_format = str_replace('/', '-', $date);
-
         $date1 = \Carbon::parse($date_format)->toDateTimeString();
-        // dd("$date1 || $date_format");
+
+        $is_hutang = false;
+        if ($this->transactionUtil->num_uf($request->bayar) < $this->transactionUtil->num_uf($request->payment[0]['amount'])) {
+            $is_hutang = true;
+        }
 
         $group_price = $request->hidden_price_group != null ? $request->hidden_price_group : $request->default_price_group;
-        // dd($request->all());
         foreach ($request->products as $key => $value) {
             $variation = Variation::with(['group_prices' => function ($q) use ($group_price) {
                 $q->where('price_group_id', $group_price);
@@ -283,7 +268,6 @@ class SellPosController extends Controller
             //   $laba = $harga_jual - $harga_pokok;
             $laba = (float)$harga_jual - (float)$harga_pokok;
 
-
             $products_override[] = [
                 "unit_price" => $value['unit_price'],
                 "line_discount_type" => $value['line_discount_type'],
@@ -306,7 +290,7 @@ class SellPosController extends Controller
         $payment_override = [
             [
                 "amount" => $sum_harga_pokok,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -326,7 +310,7 @@ class SellPosController extends Controller
             ],
             [
                 "amount" => $sum_laba,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -345,11 +329,11 @@ class SellPosController extends Controller
                 "rek_type" => "laba"
             ]
         ];
-        // dd($payment_override);
+
         if ($request->shipping_charges > 0) {
             $shipping_charges = [
                 "amount" => $request->shipping_charges,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -377,7 +361,7 @@ class SellPosController extends Controller
                 if ($sisa > 0) {
                     $shipping_charges_payment = [
                         "amount" => $request->shipping_charges,
-                        "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                        "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
                         "method" => $request->payment[0]['method'],
                         "card_number" => $request->payment[0]['card_number'],
                         "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -399,8 +383,6 @@ class SellPosController extends Controller
                 }
             }
         }
-        //dd($payment_override);
-        //$tax = Business::find(auth()->user()->business_id);
 
         if (!auth()->user()->can('sell.create') && !auth()->user()->can('direct_sell.access')) {
             abort(403, 'Unauthorized action.');
@@ -418,10 +400,9 @@ class SellPosController extends Controller
 
         try {
             $input = $request->except('_token');
-            // dd($input['products']);
+
             //Check Customer credit limit
             $is_credit_limit_exeeded = $this->transactionUtil->isCustomerCreditLimitExeeded($input);
-
             if ($is_credit_limit_exeeded !== false) {
                 $credit_limit_amount = $this->transactionUtil->num_f($is_credit_limit_exeeded, true);
                 $output = [
@@ -490,11 +471,7 @@ class SellPosController extends Controller
                     $input['selling_price_group_id'] = $request->input('price_group');
                 }
 
-
-                /* if($request->payment[0]['amount'] < $request->final_total){
-                }*/
-
-                if (isset($request->is_hutang_piutang)) {
+                if ($is_hutang) {
                     $input['is_hutang_piutang'] = 1;
                 }
 
@@ -506,32 +483,22 @@ class SellPosController extends Controller
 
                 //isi tabel transactions
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
-                //  dd($transaction);
+
                 //isi tabel transaction_sell_lines
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
 
-                if (!$is_direct_sale) {
-                    //Add change return
-                    // $change_return = $this->dummyPaymentLine;
-                    // $change_return['amount'] = $input['change_return'];
-                    // $change_return['is_return'] = 1;
-                    // dd($request->all());
-                    // $input['payment'][] = $change_return;
-                    $payment =  $input['payment'];
-                    // $payment = $this->dummyPaymentLine;
-                    // $payment['amount'] = $input['change_return'];
-                    // dd($payment);
-                }
+                $payment = $input['payment'][0];
+                $payment['amount'] = $this->transactionUtil->num_uf($bayar);
 
                 //isi duit ning kene
-                // dd($payment_override);
-                $this->transactionUtil->createOrUpdatePaymentLines($transaction, /*$input['payment']*/ $payment_override);
+                $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment_override);
 
                 // dd($transaction);
                 if ($this->transactionUtil->isModuleEnabled('tables')) {
                     $transaction->res_table_id = request()->get('res_table_id');
                     $transaction->save();
                 }
+
                 if ($this->transactionUtil->isModuleEnabled('service_staff')) {
                     $transaction->res_waiter_id = request()->get('res_waiter_id');
                     $transaction->save();
@@ -561,17 +528,68 @@ class SellPosController extends Controller
 
                     //Allocate the quantity from purchase and add mapping of
                     //purchase & sell lines in
-                    //transaction_sell_lines_purchase_lines table
                     $business = [
                         'id' => $business_id,
                         'accounting_method' => $request->session()->get('business.accounting_method'),
                         'location_id' => $input['location_id']
                     ];
-                    // $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
+
                     $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase', $product['product_id'], $product['variation_id']);
 
                     //Auto send notification
                     $this->notificationUtil->autoSendNotification($business_id, 'new_sale', $transaction, $transaction->contact);
+                }
+
+                if ($is_hutang) {
+                    if ($payment['method'] == 'cash') {
+                        $id_rekening_debit = '111.08';
+                        $id_rekening_kredit = '132.03';
+                    } else {
+                        $id_rekening_debit = '121.04';
+                        $id_rekening_kredit = '132.04';
+                    }
+
+                    $prefix_type = 'sell_payment';
+                    if ($transaction->type == 'purchase') {
+                        $prefix_type = 'purchase_payment';
+                    }
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type, $transaction->business_id);
+                    $payment_ref_no = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count, $transaction->business_id);
+
+                    $payment_data = [
+                        'transaction_id' => $transaction->id,
+                        'amount' => $this->transactionUtil->num_uf($payment['amount']),
+                        'method' => $payment['method'],
+                        'business_id' => $transaction->business_id,
+                        'is_return' => isset($payment['is_return']) ? $payment['is_return'] : 0,
+                        'card_transaction_number' => $payment['card_transaction_number'],
+                        'card_number' => $payment['card_number'],
+                        'card_type' => $payment['card_type'],
+                        'card_holder_name' => $payment['card_holder_name'],
+                        'card_month' => $payment['card_month'],
+                        'card_security' => $payment['card_security'],
+                        'cheque_number' => $payment['cheque_number'],
+                        'bank_account_number' => $payment['bank_account_number'],
+                        'note'  => $payment['note'],
+                        'paid_on' => !empty($transaction['transaction_date']) ? $transaction['transaction_date'] : \Carbon::now()->toDateTimeString(),
+                        'created_by' => empty($user_id) ? auth()->user()->id : $user_id,
+                        'payment_for' => $transaction->contact_id,
+                        'payment_ref_no' => $payment_ref_no,
+                        'account_id'   => !empty($payment['account_id']) ? $payment['account_id'] : null,
+                        'id_rekening_debit'  => $id_rekening_debit,
+                        'id_rekening_kredit'  => $id_rekening_kredit
+                    ];
+
+                    if ($payment['method'] == 'custom_pay_1') {
+                        $payment_data['transaction_no'] = $payment['transaction_no_1'];
+                    } else if ($payment['method'] == 'custom_pay_2') {
+                        $payment_data['transaction_no'] = $payment['transaction_no_2'];
+                    } else if ($payment['method'] == 'custom_pay_3') {
+                        $payment_data['transaction_no'] = $payment['transaction_no_3'];
+                    }
+
+                    $tp = TransactionPayment::create($payment_data);
+                    $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
                 }
 
                 DB::commit();
@@ -586,7 +604,6 @@ class SellPosController extends Controller
                         $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id);
                     } else {
                         // $receipt = '';
-                        // $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id);
                         if ($request->type === '3') {
                             $receipt = '';
                         } else {

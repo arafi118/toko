@@ -97,7 +97,6 @@ $(document).ready(function () {
 		var data = e.params.data;
 		let limit_a = data.credit_limit;
 		let id = data.id;
-		// console.log(id);
 		// let limit_b = 2222;
 
 		$('#hidden_price_group').val(data.selling_price_group_id);
@@ -109,11 +108,18 @@ $(document).ready(function () {
 			// async: false,
 			dataType: "json",
 			success: function (result) {
+				if (!result.deleted_at) {
+					let price_group = result.selling_price_group_id
+					$('select#price_group').val(price_group).trigger("change")
+				}
+				
 				let lim_hut_tot = 0;
 				let limit_cr = result.credit_limit;
+				
 				//total hitungan hutang
 				let sum_bay = result.sum_bay;
 				let sum_hut = result.sum_hut;
+				
 				//hitung jml hutang
 				// let sum_bay_tot =  sum_bay-sum_hut;
 				let sum_hut_tot = sum_hut - sum_bay;
@@ -1147,10 +1153,10 @@ $(document).ready(function () {
 					}
 
 					$('input#hidden_price_group').val(curr_val);
-					$("select#price_group").val(curr_val).change();
+					$("select#price_group").val(curr_val).trigger('change');
 				} else {
 					$('input#hidden_price_group').val(prev_value);
-					$("select#price_group").val(prev_value).change();
+					$("select#price_group").val(prev_value).trigger('change');
 				}
 			});
 		}

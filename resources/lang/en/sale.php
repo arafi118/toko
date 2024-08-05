@@ -74,4 +74,5 @@ return [
     'shipping_charges' => 'Biaya Pengiriman',
     'jml_kontan' => 'Jumlah Pembayaran Kontan',
     'hold_transaction' => 'Penjualan Ditahan',
+    'selling_price_group' => 'Kelompok Harga Jual'
 ];
