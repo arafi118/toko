@@ -38,7 +38,6 @@
                 </div>
             @endif
 
-            <input type="hidden" name="bayar" id="bayar" class="duit form-control payment-amount input_number">
             <div class="col-md-7">
                 <div class="form-group">
                     <label>Bayar</label>
