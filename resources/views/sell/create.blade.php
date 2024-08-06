@@ -240,129 +240,140 @@
 
                 <div class="box box-solid">
                     <div class="box-body">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                {!! Form::label('discount_type', __('sale.discount_type') . ':*') !!}
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-info"></i>
-                                    </span>
-                                    {!! Form::select(
-                                        'discount_type',
-                                        [
-                                            'fixed' => __('lang_v1.fixed'),
-                                            'percentage' => __('lang_v1.percentage'),
-                                            'fee' => __('lang_v1.fee'),
-                                        ],
-                                        'percentage',
-                                        [
-                                            'class' => 'form-control',
-                                            'placeholder' => __('messages.please_select'),
-                                            'required',
-                                            'data-default' => 'percentage',
-                                        ],
-                                    ) !!}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('discount_type', __('sale.discount_type') . ':*') !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::select(
+                                            'discount_type',
+                                            [
+                                                'fixed' => __('lang_v1.fixed'),
+                                                'percentage' => __('lang_v1.percentage'),
+                                                'fee' => __('lang_v1.fee'),
+                                            ],
+                                            'percentage',
+                                            [
+                                                'class' => 'form-control',
+                                                'placeholder' => __('messages.please_select'),
+                                                'required',
+                                                'data-default' => 'percentage',
+                                            ],
+                                        ) !!}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('discount_amount', __('sale.discount_amount') . ':*') !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::text('discount_amount', @num_format($business_details->default_sales_discount), [
+                                            'class' => 'form-control input_number',
+                                            'data-default' => $business_details->default_sales_discount,
+                                        ]) !!}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                {!! Form::label('discount_amount', __('sale.discount_amount') . ':*') !!}
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-info"></i>
-                                    </span>
-                                    {!! Form::text('discount_amount', @num_format($business_details->default_sales_discount), [
-                                        'class' => 'form-control input_number',
-                                        'data-default' => $business_details->default_sales_discount,
-                                    ]) !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4"><br>
-                            <b>@lang('sale.discount_amount'):</b>(-)
-                            <span class="display_currency" id="total_discount">0</span>
-                        </div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                {!! Form::label('tax_rate_id', __('sale.order_tax') . ':*') !!}
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-info"></i>
-                                    </span>
-                                    {!! Form::select(
-                                        'tax_rate_id',
-                                        $taxes['tax_rates'],
-                                        $business_details->default_sales_tax,
-                                        [
-                                            'placeholder' => __('messages.please_select'),
-                                            'class' => 'form-control',
-                                            'data-default' => $business_details->default_sales_tax,
-                                        ],
-                                        $taxes['attributes'],
-                                    ) !!}
 
-                                    <input type="hidden" name="tax_calculation_amount" id="tax_calculation_amount"
-                                        value="@if (empty($edit)) {{ @num_format($business_details->tax_calculation_amount) }} @else {{ @num_format(optional($transaction->tax)->amount) }} @endif"
-                                        data-default="{{ $business_details->tax_calculation_amount }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('shipping_details', __('sale.shipping_details')) !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::textarea('shipping_details', null, [
+                                            'class' => 'form-control',
+                                            'placeholder' => __('sale.shipping_details'),
+                                            'rows' => '1',
+                                            'cols' => '30',
+                                        ]) !!}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('shipping_charges', __('sale.shipping_charges')) !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::text('shipping_charges', @num_format(0.0), [
+                                            'class' => 'form-control input_number',
+                                            'placeholder' => __('sale.shipping_charges'),
+                                        ]) !!}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 col-md-offset-4">
-                            <b>@lang('sale.order_tax'):</b>(+)
-                            <span class="display_currency" id="order_tax">0</span>
-                        </div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                {!! Form::label('shipping_details', __('sale.shipping_details')) !!}
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-info"></i>
-                                    </span>
-                                    {!! Form::textarea('shipping_details', null, [
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('tax_rate_id', __('sale.order_tax') . ':*') !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::select(
+                                            'tax_rate_id',
+                                            $taxes['tax_rates'],
+                                            $business_details->default_sales_tax,
+                                            [
+                                                'placeholder' => __('messages.please_select'),
+                                                'class' => 'form-control',
+                                                'data-default' => $business_details->default_sales_tax,
+                                            ],
+                                            $taxes['attributes'],
+                                        ) !!}
+
+                                        <input type="hidden" name="tax_calculation_amount" id="tax_calculation_amount"
+                                            value="@if (empty($edit)) {{ @num_format($business_details->tax_calculation_amount) }} @else {{ @num_format(optional($transaction->tax)->amount) }} @endif"
+                                            data-default="{{ $business_details->tax_calculation_amount }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('sell_note', __('sale.sell_note')) !!}
+                                    {!! Form::textarea('sale_note', null, [
                                         'class' => 'form-control',
-                                        'placeholder' => __('sale.shipping_details'),
                                         'rows' => '1',
                                         'cols' => '30',
                                     ]) !!}
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                {!! Form::label('shipping_charges', __('sale.shipping_charges')) !!}
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-info"></i>
-                                    </span>
-                                    {!! Form::text('shipping_charges', @num_format(0.0), [
-                                        'class' => 'form-control input_number',
-                                        'placeholder' => __('sale.shipping_charges'),
-                                    ]) !!}
-                                </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label><b>@lang('sale.discount_amount'):</b>(-)</label>
+                                <span class="display_currency" id="total_discount">0</span>
                             </div>
-                        </div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-4 col-md-offset-8">
-                            <div><b>@lang('sale.total_payable'): </b>
+                            <div class="form-group col-md-4">
+                                <label><b>@lang('sale.order_tax'):</b>(+)</label>
+                                <span class="display_currency" id="order_tax">0</span>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label><b>@lang('sale.total_payable'):</b></label>
                                 <input type="hidden" name="final_total" id="final_total_input">
                                 <span id="total_payable">0</span>
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                {!! Form::label('sell_note', __('sale.sell_note')) !!}
-                                {!! Form::textarea('sale_note', null, ['class' => 'form-control', 'rows' => 3]) !!}
-                            </div>
-                        </div>
-                        <input type="hidden" name="is_direct_sale" value="1">
                     </div>
-                </div><!-- /.box -->
-
+                </div>
             </div>
+
         </div>
+
         <!--box end-->
         <div class="box box-solid" id="payment_rows_div">
             <!--box start-->
