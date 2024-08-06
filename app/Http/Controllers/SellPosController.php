@@ -236,8 +236,15 @@ class SellPosController extends Controller
         $date_format = str_replace('/', '-', $date);
         $date1 = \Carbon::parse($date_format)->toDateTimeString();
 
+        $jumlah_bayar = $this->transactionUtil->num_uf($request->bayar);
+        $jumlah_payment = $this->transactionUtil->num_uf($request->payment[0]['amount']);
+
         $is_hutang = false;
-        if ($this->transactionUtil->num_uf($request->bayar) < $this->transactionUtil->num_uf($request->payment[0]['amount'])) {
+        if ($jumlah_bayar < $jumlah_payment) {
+            $is_hutang = true;
+        }
+
+        if (isset($request->is_hutang_piutang)) {
             $is_hutang = true;
         }
 
@@ -540,7 +547,7 @@ class SellPosController extends Controller
                     $this->notificationUtil->autoSendNotification($business_id, 'new_sale', $transaction, $transaction->contact);
                 }
 
-                if ($is_hutang) {
+                if ($jumlah_bayar > 0 && $jumlah_bayar < $jumlah_payment) {
                     if ($payment['method'] == 'cash') {
                         $id_rekening_debit = '111.08';
                         $id_rekening_kredit = '132.03';
