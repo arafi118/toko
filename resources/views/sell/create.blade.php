@@ -353,6 +353,7 @@
                             </div>
                         </div>
 
+                        <input type="hidden" name="is_direct_sale" value="1">
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label><b>@lang('sale.discount_amount'):</b>(-)</label>
