@@ -447,6 +447,9 @@ class TransactionUtil extends Util
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
                                 $kd_rekening_kredit  = '131.05';
                                 $kd_rekening_debit   = '111.03';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '111.99';
+                                $kd_rekening_debit  = '515.01';
                             } else {
                                 //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
@@ -463,6 +466,9 @@ class TransactionUtil extends Util
                                 //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '111.99';
+                                $kd_rekening_debit  = '515.01';
                             } elseif ($rek_type == 'biaya_kirim') {
                                 //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
@@ -483,6 +489,9 @@ class TransactionUtil extends Util
                                 //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '111.99';
+                                $kd_rekening_debit  = '515.01';
                             } elseif ($rek_type == 'biaya_kirim') {
                                 //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
@@ -503,6 +512,9 @@ class TransactionUtil extends Util
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
                                 $kd_rekening_kredit  = '131.06';
                                 $kd_rekening_debit   = '121.02';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '121.99';
+                                $kd_rekening_debit  = '515.02';
                             } else {
                                 //biaya kirim/ pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
@@ -523,6 +535,9 @@ class TransactionUtil extends Util
                                 //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '121.99';
+                                $kd_rekening_debit  = '515.02';
                             } else {
                                 //pembayaran biaya kirim / pembayran piutang transport
                                 $kd_rekening_kredit  = '133.02';
@@ -543,6 +558,9 @@ class TransactionUtil extends Util
                                 //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
+                            } elseif ($rek_type == 'discount') {
+                                $kd_rekening_kredit   = '121.99';
+                                $kd_rekening_debit  = '515.02';
                             } else {
                                 //pembayaran biaya kirim
                                 die('pembayaran_biaya_kirim');
@@ -731,7 +749,6 @@ class TransactionUtil extends Util
                 $ttl_payment += $key['amount'];
             }
         }
-
 
         foreach ($payments as $payment) {
             $duit = $payment['amount'];
@@ -1226,8 +1243,6 @@ class TransactionUtil extends Util
             $discount = ($transaction->discount_amount / 100) * $transaction->total_before_tax;
             if ($transaction_payment && $transaction->discount_type == 'fee') {
                 $discount = ($transaction->discount_amount / 100) * $transaction_payment->amount;
-            } else {
-                $discount = 0;
             }
         } else {
             $discount = $transaction->discount_amount;
@@ -1235,7 +1250,7 @@ class TransactionUtil extends Util
 
 
         $output['discount_type'] = $transaction->discount_type;
-        $output['discount'] = ($discount >= 0) ? $discount : 0;
+        $output['discount'] = ($discount >= 0) ? $this->num_f($discount) : 0;
 
         //Format tax
         if (!empty($output['taxes'])) {
@@ -2270,7 +2285,10 @@ class TransactionUtil extends Util
     {
         $is_hutang_piutang = Transaction::select('is_hutang_piutang')->where('id', $transaction_id)->first()->is_hutang_piutang;
 
-        $gtotal_paid = TransactionPayment::where('transaction_id', $transaction_id);
+        $gtotal_paid = TransactionPayment::where([
+            ['transaction_id', $transaction_id],
+            ['id_rekening_debit', 'NOT LIKE', '515%']
+        ]);
 
         if ($is_hutang_piutang == 1) {
             $gtotal_paid->whereRaw('LEFT(id_rekening_debit,2) != 51');
@@ -2278,11 +2296,15 @@ class TransactionUtil extends Util
             $gtotal_paid->where('id_rekening_kredit', '!=', '131.08');
         }
 
-        $total_paid = $gtotal_paid->select(DB::raw('SUM(IF( is_return = 0, amount, amount*-1))as total_paid'))
-            ->first()
-            ->total_paid;
+        $total_paid = $gtotal_paid->select(DB::raw('SUM(IF( is_return = 0, amount, amount*-1)) as total'))->first();
 
-        return $total_paid;
+        $total_discount = TransactionPayment::where([
+            ['transaction_id', $transaction_id],
+            ['id_rekening_debit', 'LIKE', '515%']
+        ])->select(DB::raw('SUM(IF( is_return = 0, amount, amount*-1)) as total'))->first();
+
+        $total = $total_paid->total - $total_discount->total;
+        return $total;
     }
 
     public function getTotalPaidShipping($transaction_id, $transaction_type)

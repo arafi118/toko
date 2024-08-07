@@ -263,16 +263,13 @@ class SellPosController extends Controller
                 $harga_jual = $variation->group_prices[0]->price_inc_tax;
             } elseif ($harga_input != $harga_default) {
                 $harga_jual = str_replace(',', '', $harga_input);
-                //   $harga_jual = $harga_input;
             } else {
                 $harga_jual = $harga_default;
             }
 
-
-            //    dd($harga_jual);
             $harga_pokok = $variation['default_purchase_price'];
-            //hp = harga inputan
-            //   $laba = $harga_jual - $harga_pokok;
+
+            // hp = harga inputan
             $laba = (float)$harga_jual - (float)$harga_pokok;
 
             $products_override[] = [
@@ -297,7 +294,7 @@ class SellPosController extends Controller
         $payment_override = [
             [
                 "amount" => $sum_harga_pokok,
-                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -317,7 +314,7 @@ class SellPosController extends Controller
             ],
             [
                 "amount" => $sum_laba,
-                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -340,7 +337,7 @@ class SellPosController extends Controller
         if ($request->shipping_charges > 0) {
             $shipping_charges = [
                 "amount" => $request->shipping_charges,
-                "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -361,14 +358,14 @@ class SellPosController extends Controller
 
             array_push($payment_override, $shipping_charges);
 
-            if ($this->productUtil->num_uf($request->payment[0]['amount']) >= $request->shipping_charges) {
+            if ($jumlah_payment >= $request->shipping_charges) {
                 //kalau hutang
-                $sisa = $this->productUtil->num_uf($request->final_total) - ($this->productUtil->num_uf($request->payment[0]['amount']));
+                $sisa = $this->productUtil->num_uf($request->final_total) - ($jumlah_payment);
 
                 if ($sisa > 0) {
                     $shipping_charges_payment = [
                         "amount" => $request->shipping_charges,
-                        "pay" => $is_hutang ? 0 : $request->payment[0]['amount'],
+                        "pay" => $is_hutang ? 0 : $jumlah_payment,
                         "method" => $request->payment[0]['method'],
                         "card_number" => $request->payment[0]['card_number'],
                         "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -389,6 +386,41 @@ class SellPosController extends Controller
                     array_push($payment_override, $shipping_charges_payment);
                 }
             }
+        }
+
+        if ($this->transactionUtil->num_uf($request->discount_amount) > 0) {
+            $total_produk = $sum_harga_pokok + $sum_laba;
+
+            $discount_type = $this->transactionUtil->num_uf($request->discount_type);
+            $discount_amount = $this->transactionUtil->num_uf($request->discount_amount);
+
+            $discount = $discount_amount;
+            if ($discount_type == 'percentage') {
+                $discount = ($discount_amount * $total_produk) / 100;
+            }
+
+            $discount_payment = [
+                "amount" => $discount,
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "paid_on" => $date1,
+                "rek_type" => "discount"
+            ];
+
+            array_push($payment_override, $discount_payment);
         }
 
         if (!auth()->user()->can('sell.create') && !auth()->user()->can('direct_sell.access')) {
@@ -722,7 +754,6 @@ class SellPosController extends Controller
             $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
 
             $receipt_details->currency = session('currency');
-
 
             //If print type browser - return the content, printer - return printer config data, and invoice format config
             if ($receipt_printer_type == 'printer') {
