@@ -122,7 +122,7 @@ class LaporanController extends Controller
         $awal_bus = Business::where('id', '=', $business_id)->first();
         $nr = new RekeningRiil;
         $lr = $nr->getLabaRugi($req->tgl, $req->bln, $req->thn, $awal_bus->start_date);
-        // dd($lr);
+
         if ($req->type == 'pdf') {
             $pdf = PDF::loadView('laporan.neraca.preview', ['bl' => $bl, 'rekening_aktiva' => $ra, 'rekening_pasiva' => $rp, 'laba_rugi' => $lr, 'business_id' => $business_id]);
             $pdf->setPaper('A4', 'landscape');
@@ -157,8 +157,7 @@ class LaporanController extends Controller
         $ins = $req->jenis_buku_besar;
         $business_id    = auth()->user()->business_id;
         $jenisbuku      = JenisBuku::where([['business_id', $business_id], ['ins', $ins]]);
-        $bl             = BusinessLocation::selectRaw('id,business_id,location_id,name,landmark,country,state,city,zip_code')
-            ->where('business_id', '=', $business_id)->first();
+        $bl             = BusinessLocation::selectRaw('id,business_id,location_id,name,landmark,country,state,city,zip_code')->where('business_id', '=', $business_id)->first();
 
         $jenisbuku = $jenisbuku->first();
         $nama_buku      = $jenisbuku->nama_jb;
@@ -170,7 +169,7 @@ class LaporanController extends Controller
             $posisi = 'passiva';
         }
 
-        $reks           = Rekening::where('business_id', $business_id)->where('kd_jb', $kode_buku)->get();
+        $reks = Rekening::where('business_id', $business_id)->where('kd_jb', $kode_buku)->get();
         $trx = array();
         $sd_bln_ini_debit = 0;
         $sd_bln_ini_kredit = 0;
@@ -228,7 +227,6 @@ class LaporanController extends Controller
         // }
 
         // ksort($data['hsl']);
-
         $data = $this->arraySort($trx);
 
         $awal_tahun_debit = 0;

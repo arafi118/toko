@@ -486,7 +486,6 @@ class RekeningRiil extends Model
             $get_debit->where('transaction_date', '>=', $awal_tahun)
                 ->where('transaction_date', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
-
             $get_debit->whereBetween('transaction_date', [$awal_tahun, $akhir_bulan_lalu]);
         }
 
@@ -785,19 +784,19 @@ class RekeningRiil extends Model
         $minus_satu = date('Y-m-d', strtotime('-1 months', strtotime($tgl_kondisi)));
         $akhir_bulan_lalu = $bln != null ? Carbon::createFromFormat('Y-m-d', $minus_satu)->endOfMonth() : "";
 
-
         $get_debit = TransactionPayment::selectRaw('SUM(amount) as ttl')
             ->join('transactions', 'transaction_payments.transaction_id', '=', 'transactions.id')
             ->where('transaction_payments.business_id', auth()->user()->business_id)
             ->whereRaw('LEFT(id_rekening_debit,3) = "' . $idjenisbuku . '"');
+
         if ($tgl != null) {
             // $get_debit->whereDate('paid_on',$thn.'-'.$bln.'-'.$tgl);
             $get_debit->where('paid_on', '>=', $awal_tahun)
                 ->where('paid_on', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
-
             $get_debit->whereBetween('paid_on', [$awal_tahun, $akhir_bulan_lalu]);
         }
+
         // if($bln !=null){
         //     if($period == 'sd_bulan_lalu'){
         //         $get_debit->whereBetween('paid_on',[$awal_tahun,$akhir_bulan_lalu]);
@@ -810,13 +809,12 @@ class RekeningRiil extends Model
         if ($thn != null) {
             $get_debit->whereYear('paid_on', $thn);
         }
-        $debit    = $get_debit->first();
 
+        $debit    = $get_debit->first();
 
         $get_kredit   = TransactionPayment::selectRaw('SUM(amount) as ttl')
             ->join('transactions', 'transaction_payments.transaction_id', '=', 'transactions.id')
             ->where('transaction_payments.business_id', auth()->user()->business_id)
-            ->where('transaction_payments.id_rekening_debit', 'NOT LIKE', '515%')
             ->whereRaw('LEFT(id_rekening_kredit,3) = "' . $idjenisbuku . '"');
 
         if ($tgl != null) {
@@ -824,7 +822,6 @@ class RekeningRiil extends Model
             $get_kredit->where('paid_on', '>=', $awal_tahun)
                 ->where('paid_on', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
-
             $get_kredit->whereBetween('paid_on', [$awal_tahun, $akhir_bulan_lalu]);
         }
         // if($bln !=null){

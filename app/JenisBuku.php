@@ -611,7 +611,6 @@ class JenisBuku extends Model
             $getjurnal->whereYear('tanggal_jurnal', $thn);
         }
 
-
         $getjurnal->orderBy('tanggal_jurnal', 'ASC');
         $jurnal    = $getjurnal->get()->toArray();
 
@@ -641,9 +640,7 @@ class JenisBuku extends Model
             $gettransaksi->whereYear('transaction_date', $thn);
         }
 
-
         $gettransaksi->orderBy('transaction_date', 'ASC');
-
         $transaksi = $gettransaksi->get()->toArray();
 
         $gethtgptgbiayakirim = Transaction::selectRaw('transactions.id,transaction_date as tanggal,additional_notes as keterangan,shipping_charges as nominal,ref_no as ref_id,kd_rekening_' . $dk . '_htg_biaya_kirim as kd_rekening_' . $dk . ',transactions.created_at,"' . $nama_rekening . '" as nama_rekening,"3" as urutan,users.initial,contacts.contact_id as id_kontak,contacts.name as nama_kontak,invoice_no')
