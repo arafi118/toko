@@ -6,11 +6,11 @@
 
     <!-- Content Header (Page header) -->
     <!-- <section class="content-header">
-        <h1>Add Purchase</h1> -->
+                <h1>Add Purchase</h1> -->
     <!-- <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-            <li class="active">Here</li>
-        </ol> -->
+                    <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+                    <li class="active">Here</li>
+                </ol> -->
     <!-- </section> -->
     <style>
         .price-box {
@@ -44,6 +44,8 @@
     </style>
     <input type="hidden" id="__precision" value="{{ config('constants.currency_precision') }}">
     <input type="hidden" name="total_laba_penjualan" id="total_laba_penjualan">
+    <input type="hidden" name="cashback_type" id="cashback_type" value="percentage">
+    <input type="hidden" name="cashback_amount" id="cashback_amount" value="0">
 
     <!-- Main content -->
     <section class="content no-print">
@@ -133,35 +135,35 @@
                         <input type="hidden" name="hidden_price_group" id="hidden_price_group">
                         <input type="hidden" name="hidden_customer_group" id="hidden_customer_group">
                         <!-- @if (!empty($price_groups))
-           @if (count($price_groups) > 1)
+                   @if (count($price_groups) > 1)
     <div class="col-md-4 col-sm-6">
-             <div class="form-group">
-              <div class="input-group">
-               <span class="input-group-addon">
-                <i class="fa fa-money"></i>
-               </span>
-               @php
-                   reset($price_groups);
-               @endphp
-               {!! Form::hidden('hidden_price_group', key($price_groups), ['id' => 'hidden_price_group']) !!}
-               {!! Form::select('price_group', $price_groups, null, [
-                   'class' => 'form-control select2',
-                   'id' => 'price_group',
-                   'style' => 'width: 100%;',
-               ]) !!}
-               <span class="input-group-addon">
-                @show_tooltip(__('lang_v1.price_group_help_text'))
-               </span>
-              </div>
-             </div>
-            </div>
+                     <div class="form-group">
+                      <div class="input-group">
+                       <span class="input-group-addon">
+                        <i class="fa fa-money"></i>
+                       </span>
+                       @php
+                           reset($price_groups);
+                       @endphp
+                       {!! Form::hidden('hidden_price_group', key($price_groups), ['id' => 'hidden_price_group']) !!}
+                       {!! Form::select('price_group', $price_groups, null, [
+                           'class' => 'form-control select2',
+                           'id' => 'price_group',
+                           'style' => 'width: 100%;',
+                       ]) !!}
+                       <span class="input-group-addon">
+                        @show_tooltip(__('lang_v1.price_group_help_text'))
+                       </span>
+                      </div>
+                     </div>
+                    </div>
 @else
     @php
         reset($price_groups);
     @endphp
-            {!! Form::hidden('price_group', key($price_groups), ['id' => 'price_group']) !!}
+                    {!! Form::hidden('price_group', key($price_groups), ['id' => 'price_group']) !!}
     @endif
-          @endif -->
+                  @endif -->
 
                         <div class="@if (!empty($commission_agent)) col-sm-12 @else col-sm-12 @endif">
                             <div class="form-group" style="width: 100% !important">
