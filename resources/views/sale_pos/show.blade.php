@@ -256,6 +256,8 @@ $trans = new Transaction();
                                 if ($sell->discount_type == 'fee' || $discount < 0) {
                                     $discount = 0;
                                 }
+
+                                $cashback = $sell->cashback_amount;
                             @endphp
                             @if (count($sell->payment_lines) > 0)
                                 @foreach ($sell->payment_lines as $payment_line)
@@ -265,10 +267,17 @@ $trans = new Transaction();
                                             $total_paid -= $payment_line->amount;
                                         } else {
                                             $total_paid += $payment_line->amount;
+                                            if ($rekening == '516') {
+                                                $total_paid -= $payment_line->amount;
+                                            }
                                         }
 
                                         if ($rekening == '515') {
                                             $discount = $payment_line->amount;
+                                        }
+
+                                        if ($rekening == '516') {
+                                            $cashback = $payment_line->amount;
                                         }
                                     @endphp
                                     <tr>
@@ -377,6 +386,25 @@ $trans = new Transaction();
                                 <td><span class="display_currency pull-right"
                                         data-currency_symbol="true">{{ $sell->final_total - $total_paid }}</span></td>
                             </tr>
+
+                            @if ($cashback > 0)
+                                <tr>
+                                    <th>
+                                        {{ __('sale.cashback') }}:
+                                    </th>
+                                    <td></td>
+                                    <td>
+                                        @php
+                                            if ($cashback <= 0) {
+                                                $cashback = 0;
+                                            }
+                                        @endphp
+                                        <span class="display_currency pull-right" data-currency_symbol="true">
+                                            {{ $cashback }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endif
                         </table>
                     </div>
                 </div>

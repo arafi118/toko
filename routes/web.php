@@ -28,17 +28,25 @@ Route::middleware(['IsInstalled'])->group(function () {
 });
 
 Route::get('/link', function () {
-    $target = '/home/siupk/public_html/toko_siupk/storage/app/public';
-    $shortcut = '/home/siupk/public_html/toko_siupk/public/storage';
-    symlink($target, $shortcut);
+    $target = __DIR__ . '/../storage/app/public';
+    $shortcut = __DIR__ . '/../public/storage';
+
+    try {
+        symlink($target, $shortcut);
+        return response()->json("Symlink created successfully.");
+    } catch (\Exception $e) {
+        return response()->json("Failed to create symlink: " . $e->getMessage());
+    }
 });
 
+Route::prefix('master')->group(function () {
+    Route::get('/', 'Master\MasterController@index')->name('master.index');
+});
 
 //Routes for authenticated users only
 Route::middleware(['IsInstalled', 'auth', 'SetSessionData', 'language', 'timezone'])->group(function () {
 
     Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
-
     Route::get('/home', 'HomeController@index')->name('home');
     Route::post('/home/get-purchase-details', 'HomeController@getPurchaseDetails');
     Route::post('/home/get-sell-details', 'HomeController@getSellDetails');

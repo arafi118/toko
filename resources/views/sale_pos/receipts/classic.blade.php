@@ -106,7 +106,7 @@
                     <td></td>
                     <td>Total Hutang</td>
                     <td>:</td>
-                    <td>{{ number_format(round($receipt_details->total_due)) }}</td>
+                    <td class="text-right">{{ number_format(round($receipt_details->total_due)) }}</td>
                 </tr>
             @endif
             @if (!empty($receipt_details->shipping_charges))
@@ -114,7 +114,7 @@
                     <td></td>
                     <td>Biaya Kirim</td>
                     <td>:</td>
-                    <td>{{ number_format(round($receipt_details->shipping_charges)) }}</td>
+                    <td class="text-right">{{ number_format(round($receipt_details->shipping_charges)) }}</td>
                 </tr>
             @endif
             @if (!empty($receipt_details->discount))
@@ -125,7 +125,7 @@
                             Diskon
                         </td>
                         <td>:</td>
-                        <td>
+                        <td class="text-right">
                             {{ number_format(round($receipt_details->discount)) }}
                         </td>
                     </tr>
@@ -136,7 +136,7 @@
                     <td></td>
                     <td>Pajak</td>
                     <td>:</td>
-                    <td>{{ number_format(round($receipt_details->tax)) }}</td>
+                    <td class="text-right">{{ number_format(round($receipt_details->tax)) }}</td>
                 </tr>
             @endif
             @if (!empty($receipt_details->total))
@@ -159,6 +159,18 @@
                 <td>:</td>
                 <td class="text-right">{{ number_format((float) $receipt_details->kembali) }}</td>
             </tr>
+            @if (!empty($receipt_details->cashback))
+                <tr>
+                    <td></td>
+                    <td>
+                        Cashback
+                    </td>
+                    <td>:</td>
+                    <td class="text-right">
+                        {{ number_format(round($receipt_details->cashback)) }}
+                    </td>
+                </tr>
+            @endif
             <tr>
                 <td></td>
                 <td>Catatan</td>

@@ -17,11 +17,11 @@ class ContactUtil
      */
     public function getWalkInCustomer($business_id)
     {
-        $contact = Contact::where('type', 'customer','selling_price_group_id')
-                    ->where('business_id', $business_id)
-                    ->where('is_default', 1)
-                    ->first()
-                    ->toArray();
+        $contact = Contact::where('type', 'customer', 'selling_price_group_id')
+            ->where('business_id', $business_id)
+            ->where('is_default', 1)
+            ->first()
+            ->toArray();
 
         if (!empty($contact)) {
             return $contact;
@@ -35,8 +35,6 @@ class ContactUtil
      *
      * @param int $business_id
      * @param int $customer_id
-     *
-     * @return array
      */
     public function getCustomerGroup($business_id, $customer_id)
     {

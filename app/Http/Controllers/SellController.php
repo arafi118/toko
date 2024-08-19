@@ -269,7 +269,8 @@ class SellController extends Controller
 
         $getpayments = TransactionPayment::where([
             ['transaction_id', $transaction_id],
-            ['id_rekening_debit', 'NOT LIKE', '515%']
+            ['id_rekening_debit', 'NOT LIKE', '515%'],
+            ['id_rekening_debit', 'NOT LIKE', '516%'],
         ])->selectRaw("SUM(COALESCE(amount,0)) as total_payment");
 
 

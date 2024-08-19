@@ -391,7 +391,7 @@ class SellPosController extends Controller
         if ($this->transactionUtil->num_uf($request->discount_amount) > 0) {
             $total_produk = $sum_harga_pokok + $sum_laba;
 
-            $discount_type = $this->transactionUtil->num_uf($request->discount_type);
+            $discount_type = $request->discount_type;
             $discount_amount = $this->transactionUtil->num_uf($request->discount_amount);
 
             $discount = $discount_amount;
@@ -421,6 +421,41 @@ class SellPosController extends Controller
             ];
 
             array_push($payment_override, $discount_payment);
+        }
+
+        if ($this->transactionUtil->num_uf($request->cashback_amount) > 0) {
+            $total_produk = $sum_harga_pokok + $sum_laba;
+
+            $cashback_type = $request->cashback_type;
+            $cashback_amount = $this->transactionUtil->num_uf($request->cashback_amount);
+
+            $cashback = $cashback_amount;
+            if ($cashback_type == 'percentage') {
+                $cashback = ($cashback_amount * $total_produk) / 100;
+            }
+
+            $cashback_payment = [
+                "amount" => $cashback,
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "paid_on" => $date1,
+                "rek_type" => "cashback"
+            ];
+
+            array_push($payment_override, $cashback_payment);
         }
 
         if (!auth()->user()->can('sell.create') && !auth()->user()->can('direct_sell.access')) {
@@ -805,7 +840,6 @@ class SellPosController extends Controller
             // dd($receipt_details);
             $receipt_details->currency = session('currency');
 
-
             //If print type browser - return the content, printer - return printer config data, and invoice format config
             if ($receipt_printer_type == 'printer') {
                 $output['print_type'] = 'printer';
@@ -1042,20 +1076,26 @@ class SellPosController extends Controller
         }
 
         http_response_code(200);
+        $trx = Transaction::where('id', $id)->firstOrFail();
         $products_override = array();
         $sum_laba = 0;
         $sum_harga_pokok = 0;
-        // $session = request()->session()->all();
-        // dd(auth()->user());
-        // dd($business_id);
-        //  $get = $request->all();
-        // dd($get);
         $date = $request->input('transaction_date');
         $date1 = \Carbon::parse($date)->toDateTimeString();
-        // dd($date1);
+
+        $jumlah_bayar = $this->transactionUtil->num_uf($request->bayar);
+        $jumlah_payment = $this->transactionUtil->num_uf($request->payment[0]['amount']);
+
+        $is_hutang = false;
+        if ($jumlah_bayar < $jumlah_payment) {
+            $is_hutang = true;
+        }
+
+        if (isset($request->is_hutang_piutang)) {
+            $is_hutang = true;
+        }
 
         $group_price = $request->hidden_price_group != null ? $request->hidden_price_group : $request->default_price_group;
-        // dd($request->all());
         foreach ($request->products as $key => $value) {
             $variation = Variation::with(['group_prices' => function ($q) use ($group_price) {
                 $q->where('price_group_id', $group_price);
@@ -1070,18 +1110,12 @@ class SellPosController extends Controller
                 $harga_jual = $variation->group_prices[0]->price_inc_tax;
             } elseif ($harga_input != $harga_default) {
                 $harga_jual = str_replace(',', '', $harga_input);
-                //   $harga_jual = $harga_input;
             } else {
                 $harga_jual = $harga_default;
             }
 
-
-            //    dd($harga_jual);
             $harga_pokok = $variation['default_purchase_price'];
-            //hp = harga inputan
-            //   $laba = $harga_jual - $harga_pokok;
             $laba = (float)$harga_jual - (float)$harga_pokok;
-
 
             $products_override[] = [
                 "unit_price" => $value['unit_price'],
@@ -1102,11 +1136,10 @@ class SellPosController extends Controller
             $sum_harga_pokok += $harga_pokok * $value['quantity'];
         }
 
-        // dd($request);
         $payment_override = [
             [
                 "amount" => $sum_harga_pokok,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -1126,7 +1159,7 @@ class SellPosController extends Controller
             ],
             [
                 "amount" => $sum_laba,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -1145,11 +1178,11 @@ class SellPosController extends Controller
                 "rek_type" => "laba"
             ]
         ];
-        // dd($payment_override);
+
         if ($request->shipping_charges > 0) {
             $shipping_charges = [
                 "amount" => $request->shipping_charges,
-                "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -1170,14 +1203,13 @@ class SellPosController extends Controller
 
             array_push($payment_override, $shipping_charges);
 
-            if ($this->productUtil->num_uf($request->payment[0]['amount']) >= $request->shipping_charges) {
-                //kalau hutang
-                $sisa = $this->productUtil->num_uf($request->final_total) - ($this->productUtil->num_uf($request->payment[0]['amount']));
+            if ($jumlah_payment >= $request->shipping_charges) {
+                $sisa = $this->productUtil->num_uf($request->final_total) - ($jumlah_payment);
 
                 if ($sisa > 0) {
                     $shipping_charges_payment = [
                         "amount" => $request->shipping_charges,
-                        "pay" => isset($request->is_hutang_piutang) ? 0 : $request->payment[0]['amount'],
+                        "pay" => $is_hutang ? 0 : $jumlah_payment,
                         "method" => $request->payment[0]['method'],
                         "card_number" => $request->payment[0]['card_number'],
                         "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -1200,6 +1232,76 @@ class SellPosController extends Controller
             }
         }
 
+        if ($this->transactionUtil->num_uf($request->discount_amount) > 0) {
+            $total_produk = $sum_harga_pokok + $sum_laba;
+
+            $discount_type = $request->discount_type;
+            $discount_amount = $this->transactionUtil->num_uf($request->discount_amount);
+
+            $discount = $discount_amount;
+            if ($discount_type == 'percentage') {
+                $discount = ($discount_amount * $total_produk) / 100;
+            }
+
+            $discount_payment = [
+                "amount" => $discount,
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "paid_on" => $date1,
+                "rek_type" => "discount"
+            ];
+
+            array_push($payment_override, $discount_payment);
+        }
+
+        if ($this->transactionUtil->num_uf($request->cashback_amount) > 0) {
+            $total_produk = $sum_harga_pokok + $sum_laba;
+
+            $cashback_type = $request->cashback_type;
+            $cashback_amount = $this->transactionUtil->num_uf($request->cashback_amount);
+
+            $cashback = $cashback_amount;
+            if ($cashback_type == 'percentage') {
+                $cashback = ($cashback_amount * $total_produk) / 100;
+            }
+
+            $cashback_payment = [
+                "amount" => $cashback,
+                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "method" => $request->payment[0]['method'],
+                "card_number" => $request->payment[0]['card_number'],
+                "card_holder_name" => $request->payment[0]['card_holder_name'],
+                "card_transaction_number" => $request->payment[0]['card_transaction_number'],
+                "card_type" => $request->payment[0]['card_type'],
+                "card_month" => $request->payment[0]['card_month'],
+                "card_year" => $request->payment[0]['card_year'],
+                "card_security" => $request->payment[0]['card_security'],
+                "cheque_number" => $request->payment[0]['cheque_number'],
+                "bank_account_number" => $request->payment[0]['bank_account_number'],
+                "transaction_no_1" => $request->payment[0]['transaction_no_1'],
+                "transaction_no_2" => $request->payment[0]['transaction_no_2'],
+                "transaction_no_3" => $request->payment[0]['transaction_no_3'],
+                "note" => $request->payment[0]['note'],
+                "paid_on" => $date1,
+                "rek_type" => "cashback"
+            ];
+
+            array_push($payment_override, $cashback_payment);
+        }
+
         $input = $request->except('_token');
 
         //status is send as quotation from edit sales screen.
@@ -1208,6 +1310,7 @@ class SellPosController extends Controller
             $input['is_quotation'] = 1;
         }
 
+        $updatePayment = false;
         $is_direct_sale = false;
         if (!empty($input['products'])) {
             //Get transaction value before updating.
@@ -1277,6 +1380,11 @@ class SellPosController extends Controller
             if ($request->has('price_group')) {
                 $input['selling_price_group_id'] = $request->input('price_group');
             }
+
+            if ($this->transactionUtil->num_uf($input['final_total']) != $trx->final_total) {
+                $updatePayment = true;
+            }
+
             //Begin transaction
             DB::beginTransaction();
 
@@ -1296,6 +1404,10 @@ class SellPosController extends Controller
                 }
                 $input['payment'][] = $change_return;
 
+                $updatePayment = true;
+            }
+
+            if ($updatePayment) {
                 $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment_override);
 
                 //Update cash register

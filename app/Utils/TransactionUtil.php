@@ -52,8 +52,6 @@ class TransactionUtil extends Util
      * @param array $input
      * @param float $invoice_total
      * @param int $user_id
-     *
-     * @return boolean
      */
     public function createSellTransaction($business_id, $input, $invoice_total, $user_id)
     {
@@ -78,6 +76,8 @@ class TransactionUtil extends Util
             'tax_id' => $input['tax_rate_id'],
             'discount_type' => $input['discount_type'],
             'discount_amount' => $this->num_uf($input['discount_amount']),
+            'cashback_type' => $input['cashback_type'],
+            'cashback_amount' => $this->num_uf($input['cashback_amount']),
             'tax_amount' => $invoice_total['tax'],
             'final_total' => "$fintot",
             'bayar' => "$bayar",
@@ -450,8 +450,10 @@ class TransactionUtil extends Util
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '111.99';
                                 $kd_rekening_debit  = '515.01';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '111.93';
+                                $kd_rekening_debit  = '516.01';
                             } else {
-                                //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             }
@@ -459,22 +461,21 @@ class TransactionUtil extends Util
                     } elseif ($tipe_bayar == 'pembayaran_sebagian') {
                         if ($rek_type != null) {
                             if ($rek_type == 'laba') {
-                                //penyaluran piutang dagang laba
                                 $kd_rekening_kredit = '411.02';
                                 $kd_rekening_debit = '132.02';
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
-                                //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '111.99';
                                 $kd_rekening_debit  = '515.01';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '111.93';
+                                $kd_rekening_debit  = '516.01';
                             } elseif ($rek_type == 'biaya_kirim') {
-                                //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             } else {
-                                //pembayaran biaya kirim / pembayran piutang transport
                                 $kd_rekening_kredit  = '133.02';
                                 $kd_rekening_debit   = '111.36';
                             }
@@ -482,22 +483,21 @@ class TransactionUtil extends Util
                     } elseif ($tipe_bayar == 'hutang') {
                         if ($rek_type != null) {
                             if ($rek_type == 'laba') {
-                                //penyaluran piutang dagang laba
                                 $kd_rekening_kredit = '411.02';
                                 $kd_rekening_debit = '132.02';
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
-                                //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '111.99';
                                 $kd_rekening_debit  = '515.01';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '111.93';
+                                $kd_rekening_debit  = '516.01';
                             } elseif ($rek_type == 'biaya_kirim') {
-                                //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             } else {
-                                //pembayaran biaya kirim
                                 die('pembayaran_biaya_kirim');
                             }
                         }
@@ -506,7 +506,6 @@ class TransactionUtil extends Util
                     if ($tipe_bayar == 'lunas') {
                         if ($rek_type != null) {
                             if ($rek_type == 'laba') {
-
                                 $kd_rekening_kredit   = '411.03';
                                 $kd_rekening_debit    = '121.03';
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
@@ -515,8 +514,10 @@ class TransactionUtil extends Util
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '121.99';
                                 $kd_rekening_debit  = '515.02';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '121.93';
+                                $kd_rekening_debit  = '516.02';
                             } else {
-                                //biaya kirim/ pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             }
@@ -524,22 +525,21 @@ class TransactionUtil extends Util
                     } elseif ($tipe_bayar == 'pembayaran_sebagian') {
                         if ($rek_type != null) {
                             if ($rek_type == 'laba') {
-                                //penyaluran piutang dagang laba
                                 $kd_rekening_kredit = '411.02';
                                 $kd_rekening_debit = '132.02';
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
-                                //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
                             } elseif ($rek_type == 'biaya_kirim') {
-                                //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '121.99';
                                 $kd_rekening_debit  = '515.02';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '121.93';
+                                $kd_rekening_debit  = '516.02';
                             } else {
-                                //pembayaran biaya kirim / pembayran piutang transport
                                 $kd_rekening_kredit  = '133.02';
                                 $kd_rekening_debit   = '111.36';
                             }
@@ -547,22 +547,21 @@ class TransactionUtil extends Util
                     } elseif ($tipe_bayar == 'hutang') {
                         if ($rek_type != null) {
                             if ($rek_type == 'laba') {
-                                //penyaluran piutang dagang laba
                                 $kd_rekening_kredit = '411.02';
                                 $kd_rekening_debit = '132.02';
                             } elseif ($rek_type == 'harga_pokok_penjualan') {
-                                //penyaluran piutang dagang hpp
                                 $kd_rekening_kredit  = '131.08';
                                 $kd_rekening_debit   = '132.01';
                             } elseif ($rek_type == 'biaya_kirim') {
-                                //biaya kirim / pendapatan lain-lain
                                 $kd_rekening_kredit  = '411.04';
                                 $kd_rekening_debit   = '111.09';
                             } elseif ($rek_type == 'discount') {
                                 $kd_rekening_kredit   = '121.99';
                                 $kd_rekening_debit  = '515.02';
+                            } elseif ($rek_type == 'cashback') {
+                                $kd_rekening_kredit   = '121.93';
+                                $kd_rekening_debit  = '516.02';
                             } else {
-                                //pembayaran biaya kirim
                                 die('pembayaran_biaya_kirim');
                             }
                         }
@@ -787,7 +786,6 @@ class TransactionUtil extends Util
                     //Generate reference number
                     $payment_ref_no = $this->generateReferenceNumber($prefix_type, $ref_count, $business_id);
 
-
                     if ($transaction->status == 'received' || $transaction->status == 'final') {
                         if (isset($payment['rek_type'])) {
                             $accountNum = $this->accountNumbering($transaction->type, $payment['method'], $tipe_bayar, $payment['rek_type']);
@@ -941,8 +939,6 @@ class TransactionUtil extends Util
      * @param array $business_details
      * @param array $receipt_details
      * @param string $receipt_printer_type
-     *
-     * @return array
      */
     public function getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type)
     {
@@ -1251,6 +1247,16 @@ class TransactionUtil extends Util
 
         $output['discount_type'] = $transaction->discount_type;
         $output['discount'] = ($discount >= 0) ? $this->num_f($discount) : 0;
+
+        // Cashback
+        if ($transaction->cashback_type == 'percentage') {
+            $cashback = ($transaction->cashback_amount / 100) * $transaction->total_before_tax;
+        } else {
+            $cashback = $transaction->cashback_amount;
+        }
+
+        $output['cashback_type'] = $transaction->cashback_type;
+        $output['cashback'] = ($cashback >= 0) ? $this->num_f($cashback) : 0;
 
         //Format tax
         if (!empty($output['taxes'])) {
@@ -2287,7 +2293,8 @@ class TransactionUtil extends Util
 
         $gtotal_paid = TransactionPayment::where([
             ['transaction_id', $transaction_id],
-            ['id_rekening_debit', 'NOT LIKE', '515%']
+            ['id_rekening_debit', 'NOT LIKE', '515%'],
+            ['id_rekening_debit', 'NOT LIKE', '516%'],
         ]);
 
         if ($is_hutang_piutang == 1) {

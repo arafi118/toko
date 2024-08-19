@@ -285,6 +285,47 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    {!! Form::label('cashback_type', __('sale.cashback_type') . ':*') !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::select(
+                                            'cashback_type',
+                                            [
+                                                'fixed' => __('lang_v1.fixed'),
+                                                'percentage' => __('lang_v1.percentage'),
+                                            ],
+                                            'percentage',
+                                            [
+                                                'class' => 'form-control',
+                                                'placeholder' => __('messages.please_select'),
+                                                'required',
+                                                'data-default' => 'percentage',
+                                            ],
+                                        ) !!}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('cashback_amount', __('sale.cashback_amount') . ':*') !!}
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-info"></i>
+                                        </span>
+                                        {!! Form::text('cashback_amount', @num_format(0.0), [
+                                            'class' => 'form-control input_number',
+                                            'data-default' => @num_format(0.0),
+                                        ]) !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
                                     {!! Form::label('shipping_details', __('sale.shipping_details')) !!}
                                     <div class="input-group">
                                         <span class="input-group-addon">
@@ -355,15 +396,19 @@
 
                         <input type="hidden" name="is_direct_sale" value="1">
                         <div class="form-row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label><b>@lang('sale.discount_amount'):</b>(-)</label>
                                 <span class="display_currency" id="total_discount">0</span>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
+                                <label><b>@lang('sale.cashback_amount'):</b></label>
+                                <span class="display_currency" id="total_cashback">0</span>
+                            </div>
+                            <div class="form-group col-md-3">
                                 <label><b>@lang('sale.order_tax'):</b>(+)</label>
                                 <span class="display_currency" id="order_tax">0</span>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label><b>@lang('sale.total_payable'):</b></label>
                                 <input type="hidden" name="final_total" id="final_total_input">
                                 <span id="total_payable">0</span>

@@ -938,7 +938,7 @@ $(document).ready(function () {
 
 
 	//Updates for add sell
-	$('select#discount_type, input#discount_amount, input#shipping_charges').change(function () {
+	$('select#discount_type, input#discount_amount,select#cashback_type, input#cashback_amount, input#shipping_charges').change(function () {
 		pos_total_row();
 	});
 	$('select#tax_rate_id').change(function () {
@@ -1360,6 +1360,7 @@ function pos_total_row() {
 
 function calculate_billing_details(price_total) {
 	var discount = pos_discount(price_total);
+	var cashback = pos_cashback(price_total);
 	var order_tax = pos_order_tax(price_total, discount);
 	var calculation_type = $('#discount_type').val();
 
@@ -1406,6 +1407,17 @@ function pos_discount(total_amount) {
 	$('span#total_discount').text(__currency_trans_from_en(discount, false));
 
 	return discount;
+}
+
+function pos_cashback(total_amount) {
+	var calculation_type = $('#cashback_type').val();
+	var calculation_amount = __read_number($('#cashback_amount'));
+
+	var cashback = __calculate_amount(calculation_type, calculation_amount, total_amount);
+
+	$('span#total_cashback').text(__currency_trans_from_en(cashback, false));
+
+	return cashback;
 }
 
 function pos_order_tax(price_total, discount) {

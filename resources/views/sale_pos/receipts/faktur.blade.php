@@ -141,6 +141,18 @@
                 <td style="padding-right: 3px;">
                     {{ $receipt_details->total }}</td>
             </tr>
+
+            @if ($receipt_details->cashback > 0)
+                <tr>
+                    <td>&nbsp;</td>
+                    <td style="width: 200px;">
+                        <b>Cashback : &nbsp;&nbsp;Rp.</b>
+                    </td>
+                    <td style="padding-right: 3px;">
+                        {{ $receipt_details->cashback }}
+                    </td>
+                </tr>
+            @endif
         </table>
         <br>
         <table class="" style="font-size:16px; width: 100%;font-size:16px;text-align:center;">
