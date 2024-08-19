@@ -475,6 +475,11 @@ class SellPosController extends Controller
         try {
             $input = $request->except('_token');
 
+            if (!isset($input['cashback_type'])) {
+                $input['cashback_type'] = 'percentage';
+                $input['cashback_amount'] = 0;
+            }
+
             //Check Customer credit limit
             $is_credit_limit_exeeded = $this->transactionUtil->isCustomerCreditLimitExeeded($input);
             if ($is_credit_limit_exeeded !== false) {
