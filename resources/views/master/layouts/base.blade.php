@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Master Toko</title>
     <link rel="stylesheet" href="{{ asset('AdminLTE/plugins/pace/pace.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/font-awesome/css/font-awesome.min.css') }}">
@@ -85,6 +86,26 @@
     @else
         <script src="{{ asset('js/lang/en.js') }}"></script>
     @endif
+
+    <script>
+        $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+        });
+        var financial_year = {
+            start: moment('2024-01-01'),
+            end: moment('2024-12-31'),
+        }
+        //Default setting for select2
+        $.fn.select2.defaults.set("language", "en");
+
+        var datepicker_date_format = "dd-mm-yyyy";
+        var moment_date_format = "DD-MM-YYYY";
+        var moment_time_format = "HH:mm";
+    </script>
 
     <script src="{{ asset('js/functions.js') }}"></script>
     <script src="{{ asset('js/common.js') }}"></script>

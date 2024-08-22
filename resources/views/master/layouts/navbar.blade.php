@@ -9,7 +9,7 @@
                 </button>
             </div>
 
-            <div class="collapse navbar-collapse pull-right" id="navbar-collapse">
+            {{-- <div class="collapse navbar-collapse pull-right" id="navbar-collapse">
                 <ul class="nav navbar-nav ml-auto">
                     <li class="active">
                         <a href="#">
@@ -20,7 +20,7 @@
                         <a href="#">Link</a>
                     </li>
                 </ul>
-            </div>
+            </div> --}}
         </div>
     </nav>
 </header>

@@ -9,7 +9,7 @@ if ($host == 'toko.test') {
     $host = env('DB_DATABASE', 'toko');
 } else {
     $host = str_replace('.siupk.net', '', $host);
-    $host = str_replace('toko', 'siupk', $host);
+    $host = str_replace(env('URL_PREFIX'), env('DB_PREFIX'), $host);
     $host = str_replace('-', '_', $host);
 }
 

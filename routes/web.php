@@ -41,6 +41,12 @@ Route::get('/link', function () {
 
 Route::prefix('master')->group(function () {
     Route::get('/', 'Master\MasterController@index')->name('master.index');
+    Route::get('/wilayah/kab/{kd_prov}', 'Master\MasterController@kab')->name('master.kab');
+    Route::get('/wilayah/kec/{kd_kab}', 'Master\MasterController@kec')->name('master.kec');
+
+    Route::post('/register', 'Master\MasterController@register')->name('master.register');
+    Route::post('/jenis_buku', 'Master\MasterController@jenisBuku')->name('master.jenis_buku');
+    Route::post('/rekening', 'Master\MasterController@rekening')->name('master.jenis_buku');
 });
 
 //Routes for authenticated users only
