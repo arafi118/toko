@@ -310,6 +310,13 @@ $trans = new Transaction();
                         </table>
                     </div>
                 </div>
+
+                @php
+                    if ($total_paid < 0) {
+                        $total_paid = 0;
+                    }
+                @endphp
+
                 <div class="col-md-6 col-sm-12 col-xs-12">
                     <div class="table-responsive">
                         <table class="table bg-gray">

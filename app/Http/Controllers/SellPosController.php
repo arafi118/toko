@@ -401,7 +401,7 @@ class SellPosController extends Controller
 
             $discount_payment = [
                 "amount" => $discount,
-                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "pay" => $discount,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -436,7 +436,7 @@ class SellPosController extends Controller
 
             $cashback_payment = [
                 "amount" => $cashback,
-                "pay" => $is_hutang ? 0 : $jumlah_payment,
+                "pay" => $cashback,
                 "method" => $request->payment[0]['method'],
                 "card_number" => $request->payment[0]['card_number'],
                 "card_holder_name" => $request->payment[0]['card_holder_name'],
@@ -572,7 +572,6 @@ class SellPosController extends Controller
                 //isi duit ning kene
                 $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment_override);
 
-                // dd($transaction);
                 if ($this->transactionUtil->isModuleEnabled('tables')) {
                     $transaction->res_table_id = request()->get('res_table_id');
                     $transaction->save();
@@ -725,7 +724,6 @@ class SellPosController extends Controller
                 'msg' => "File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage()
             ];
         }
-        // dd($request->type);
         if (!$is_direct_sale) {
             return $output;
         } else {

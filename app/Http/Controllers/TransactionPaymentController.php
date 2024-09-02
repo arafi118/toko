@@ -61,6 +61,7 @@ class TransactionPaymentController extends Controller
     public function store(Request $request)
     {
 
+        // dd($request->all());
         try {
             $business_id = $request->session()->get('user.business_id');
             $transaction_id = $request->input('transaction_id');

@@ -276,15 +276,19 @@ class SellController extends Controller
 
         if ($transaction->is_hutang_piutang == 1) {
             $getpayments->whereNotIn('id_rekening_kredit', ['131.08', '411.04', '411.02', '131.13', '411.19']);
-            $getpayments->whereRaw("LEFT(id_rekening_debit,2) != 51");
+            // $getpayments->whereRaw("LEFT(id_rekening_debit,2) != 51");
         }
         $payments = $getpayments->first();
 
         if ($getDiscount) {
             $kekurangan = $transaction->final_total - ($payments->total_payment - $getDiscount->amount);
+            if ($payments->total_payment <= 0) {
+                $kekurangan = $transaction->final_total;
+            }
         } else {
             $kekurangan = $transaction->final_total - ($payments->total_payment);
         }
+
         if ($kekurangan <= '0' && $transaction->payment_status == 'partial' && $transaction->is_hutang_piutang == '1') {
             Transaction::where('id', $transaction_id)->update([
                 'payment_status' => 'paid',
@@ -422,7 +426,7 @@ class SellController extends Controller
                 $query->leftJoin('rekening', 'transaction_payments.id_rekening_debit', '=', 'rekening.kd_rekening');
                 $query->groupBy('transaction_payments.id');
                 if ($is_hutang_piutang == 1) {
-                    $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
+                    // $query->whereRaw('LEFT(id_rekening_debit,2) != 51');
                     $query->whereNotIn('id_rekening_kredit', ['131.08', '411.04', '411.02', '131.13', '411.19']);
                 }
             }))
