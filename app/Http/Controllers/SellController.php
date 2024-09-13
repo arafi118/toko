@@ -263,9 +263,10 @@ class SellController extends Controller
         $transaction = Transaction::findOrFail($transaction_id);
 
         $getDiscount = TransactionPayment::where([
-            ['transaction_id', $transaction_id],
-            ['id_rekening_debit', 'LIKE', '515%']
-        ])->first();
+            ['transaction_id', $transaction_id]
+        ])->where(function ($query) {
+            $query->where('id_rekening_debit', 'LIKE', '515%')->orwhere('id_rekening_debit', 'LIKE', '516%');
+        })->first();
 
         $getpayments = TransactionPayment::where([
             ['transaction_id', $transaction_id],
@@ -281,7 +282,11 @@ class SellController extends Controller
         $payments = $getpayments->first();
 
         if ($getDiscount) {
-            $kekurangan = $transaction->final_total - ($payments->total_payment - $getDiscount->amount);
+            $potongan = ($payments->total_payment - $getDiscount->amount);
+            if (explode('.', $getDiscount->id_rekening_debit)[0] == '516') {
+                $potongan = ($payments->total_payment + $getDiscount->amount);
+            }
+            $kekurangan = $transaction->final_total - $potongan;
             if ($payments->total_payment <= 0) {
                 $kekurangan = $transaction->final_total;
             }

@@ -381,6 +381,24 @@ $trans = new Transaction();
                                 <td></td>
                                 <td><span class="display_currency pull-right">{{ $sell->final_total }}</span></td>
                             </tr>
+                            @php
+                                if ($cashback <= 0) {
+                                    $cashback = 0;
+                                }
+                            @endphp
+                            @if ($cashback > 0)
+                                <tr>
+                                    <th>
+                                        {{ __('sale.cashback') }}:
+                                    </th>
+                                    <td></td>
+                                    <td>
+                                        <span class="display_currency pull-right" data-currency_symbol="true">
+                                            {{ $cashback }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endif
                             <tr>
                                 <th>{{ __('sale.total_paid') }}:</th>
                                 <td></td>
@@ -391,27 +409,10 @@ $trans = new Transaction();
                                 <th>{{ __('sale.total_remaining') }}:</th>
                                 <td></td>
                                 <td><span class="display_currency pull-right"
-                                        data-currency_symbol="true">{{ $sell->final_total - $total_paid }}</span></td>
+                                        data-currency_symbol="true">{{ $sell->final_total - $total_paid - $cashback }}</span>
+                                </td>
                             </tr>
 
-                            @if ($cashback > 0)
-                                <tr>
-                                    <th>
-                                        {{ __('sale.cashback') }}:
-                                    </th>
-                                    <td></td>
-                                    <td>
-                                        @php
-                                            if ($cashback <= 0) {
-                                                $cashback = 0;
-                                            }
-                                        @endphp
-                                        <span class="display_currency pull-right" data-currency_symbol="true">
-                                            {{ $cashback }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endif
                         </table>
                     </div>
                 </div>
