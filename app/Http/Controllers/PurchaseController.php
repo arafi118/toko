@@ -403,7 +403,7 @@ class PurchaseController extends Controller
             array_push($payment_override, $shipping_charges);
             if ($request->payment[0]['amount'] >= $request->shipping_charges) {
                 //kalau hutang
-                $sisa = $this->productUtil->num_uf($request->final_total) - ($request->payment[0]['amount']);
+                $sisa = intval($this->productUtil->num_uf($request->final_total)) - intval(($request->payment[0]['amount']));
 
                 if ($sisa > 0) {
                     $shipping_charges_payment = [
