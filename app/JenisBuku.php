@@ -835,11 +835,10 @@ class JenisBuku extends Model
         $awal_tahun = Carbon::create($thn, 1, 31, 12, 0, 0)->startOfYear();
         $tgl_kondisi = date("$thn-$bln-01");
         $tgl_input = date("$thn-$bln-$tgl");
-        $akhir_hari = $tgl != null ? Carbon::createFromFormat('Y-m-d', $tgl_input)->startOfDay() : "";
+        $akhir_hari = $tgl != null ? Carbon::createFromFormat('Y-m-t', $tgl_input)->startOfDay() : "";
         $minus_satu = date('Y-m-d', strtotime('-1 months', strtotime($tgl_kondisi)));
         $akhir_bulan_ini = $bln != null ? Carbon::createFromFormat('Y-m-d', $tgl_kondisi)->endOfMonth() : "";
         $akhir_bulan_lalu = $bln != null ? Carbon::createFromFormat('Y-m-d', $minus_satu)->endOfMonth() : "";
-
 
         $jurnal_sab = Jurnal::selectRaw('jurnal.id,tanggal_jurnal as tanggal,keterangan,nominal,ref_id,kd_rekening_' . $dk . ',jurnal.created_at,"' . $nama_rekening . '" as nama_rekening,"1" as urutan,users.initial,"-" as id_kontak,"-" as nama_kontak,"-" as invoice_no')
             ->leftJoin('users', 'jurnal.created_by', '=', 'users.id')
@@ -847,7 +846,6 @@ class JenisBuku extends Model
             ->where('kd_rekening_' . $dk, $kd_rekening);
 
         if ($tgl != null) {
-
             $jurnal_sab->where('tanggal_jurnal', '>=', $awal_tahun)
                 ->where('tanggal_jurnal', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
@@ -866,7 +864,6 @@ class JenisBuku extends Model
             ->where('kd_rekening_' . $dk, $kd_rekening);
 
         if ($tgl != null) {
-
             $tr_sab->where('transaction_date', '>=', $awal_tahun)
                 ->where('transaction_date', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
@@ -877,6 +874,23 @@ class JenisBuku extends Model
         $tr_sab->orderBy('transaction_date', 'ASC');
         $trsab   = $tr_sab->get()->toArray();
 
+        $tr_ht_sab = Transaction::selectRaw('transactions.id,transaction_date as tanggal,additional_notes as keterangan,shipping_charges as nominal,ref_no as ref_id,kd_rekening_' . $dk . '_htg_biaya_kirim as kd_rekening_' . $dk . ',transactions.created_at,"' . $nama_rekening . '" as nama_rekening,"3" as urutan,users.initial,contacts.contact_id as id_kontak,contacts.name as nama_kontak,invoice_no')
+            ->leftJoin('users', 'transactions.created_by', '=', 'users.id')
+            ->leftJoin('contacts', 'transactions.contact_id', '=', 'contacts.id')
+            ->where('transactions.business_id', auth()->user()->business_id)
+            ->where('kd_rekening_' . $dk . '_htg_biaya_kirim', $kd_rekening);
+
+        if ($tgl != null) {
+            $tr_ht_sab->where('transaction_date', '>=', $awal_tahun)
+                ->where('transaction_date', '<', $akhir_hari);
+        } elseif ($period == 'sd_bulan_lalu') {
+            //1 januari tahun ini - akhir bulan lalu
+            $tr_ht_sab->whereBetween('transaction_date', [$awal_tahun, $akhir_bulan_lalu]);
+            // $tr_sab->whereYear('transaction_date',$y_now);
+        }
+
+        $tr_ht_sab->orderBy('transaction_date', 'ASC');
+        $trhtsab = $tr_ht_sab->get()->toArray();
 
         $payment_sab = TransactionPayment::selectRaw('transactions.id as trxx,transaction_payments.id,paid_on as tanggal,note as keterangan,amount as nominal,payment_ref_no as ref_id,id_rekening_' . $dk . ' as kd_rekening_' . $dk . ',transaction_payments.created_at,"' . $nama_rekening . '" as nama_rekening,"4" as urutan,users.initial,contacts.contact_id as id_kontak,contacts.name as nama_kontak,invoice_no')
             ->leftJoin('users', 'transaction_payments.created_by', '=', 'users.id')
@@ -886,7 +900,6 @@ class JenisBuku extends Model
             ->where('id_rekening_' . $dk, $kd_rekening);
 
         if ($tgl != null) {
-
             $payment_sab->where('paid_on', '>=', $awal_tahun)
                 ->where('paid_on', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
@@ -898,7 +911,6 @@ class JenisBuku extends Model
         $payment_sab->orderBy('paid_on', 'ASC');
         $psab   = $payment_sab->get()->toArray();
 
-
         $adjustment_sab = StockAdjustmentLine::selectRaw('stock_adjustment_lines.id,stock_adjustment_lines.created_at as tanggal,transactions.staff_note as keterangan,(unit_price * quantity) as nominal,lot_no_line_id as ref_id,id_rekening_' . $dk . ' as kd_rekening_' . $dk . ',transactions.created_at,"' . $nama_rekening . '" as nama_rekening,"6" as urutan,users.initial,contacts.contact_id as id_kontak,contacts.name as nama_kontak,transactions.invoice_no')
             ->join('transactions', 'stock_adjustment_lines.transaction_id', '=', 'transactions.id')
             ->leftJoin('users', 'transactions.created_by', '=', 'users.id')
@@ -907,7 +919,6 @@ class JenisBuku extends Model
             ->where('id_rekening_' . $dk, $kd_rekening);
 
         if ($tgl != null) {
-
             $adjustment_sab->where('stock_adjustment_lines.created_at', '>=', $awal_tahun)
                 ->where('stock_adjustment_lines.created_at', '<', $akhir_hari);
         } elseif ($period == 'sd_bulan_lalu') {
@@ -919,7 +930,7 @@ class JenisBuku extends Model
         $adjustment_sab->orderBy('stock_adjustment_lines.created_at', 'ASC');
         $sosab   = $adjustment_sab->get()->toArray();
 
-        $total = array_merge($jsab, $trsab, $psab, $sosab);
+        $total = array_merge($jsab, $trsab, $trhtsab, $psab, $sosab);
         // $total = $paydua;
 
         return $total;

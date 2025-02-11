@@ -118,7 +118,6 @@ if ($awal_tahun_debit + $awal_tahun_kredit + $awal_pakai_debit + $awal_pakai_kre
                 <td></td>
                 <td></td>
                 <?php
-                
                 if ($thn_pakai == $thn) {
                     $awpkai_debit = $awal_pakai_debit;
                     $awpkai_kredit = $awal_pakai_kredit;
@@ -234,7 +233,8 @@ if ($awal_tahun_debit + $awal_tahun_kredit + $awal_pakai_debit + $awal_pakai_kre
                 <td align="right"><b>{{ number_format($awal_pakai_kredit + $t_kredit, 2) }}</b></td>
 
                 <td align="center" rowspan="2" colspan="2">
-                    <b>{{ number_format($saldo_awal_tahun + $saldo_awal_pakai + $saldo, 2) }}</b></td>
+                    <b>{{ number_format($saldo_awal_tahun + $saldo_awal_pakai + $saldo, 2) }}</b>
+                </td>
             </tr>
             <tr>
                 <td colspan="5">Transaksi Komulatif sampai dengan Tahun

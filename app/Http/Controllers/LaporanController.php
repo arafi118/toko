@@ -207,6 +207,8 @@ class LaporanController extends Controller
                         $sd_bln_lalu_debit += isset($vl['kd_rekening_debit']) ? $vl['nominal'] : 0;
                         $sd_bln_lalu_kredit += isset($vl['kd_rekening_kredit']) ? $vl['nominal'] : 0;
                     }
+
+                    // dd($sd_bln_lalu_debit, $sd_bln_lalu_kredit);
                 }
             }
 
