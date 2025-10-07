@@ -49,8 +49,20 @@ class PurchaseController extends Controller
         $this->moduleUtil = $moduleUtil;
 
         $this->dummyPaymentLine = [
-            'method' => 'cash', 'amount' => 0, 'note' => '', 'card_transaction_number' => '', 'card_number' => '', 'card_type' => '', 'card_holder_name' => '', 'card_month' => '', 'card_year' => '', 'card_security' => '', 'cheque_number' => '', 'bank_account_number' => '',
-            'is_return' => 0, 'transaction_no' => ''
+            'method' => 'cash',
+            'amount' => 0,
+            'note' => '',
+            'card_transaction_number' => '',
+            'card_number' => '',
+            'card_type' => '',
+            'card_holder_name' => '',
+            'card_month' => '',
+            'card_year' => '',
+            'card_security' => '',
+            'cheque_number' => '',
+            'bank_account_number' => '',
+            'is_return' => 0,
+            'transaction_no' => ''
         ];
     }
 
@@ -525,7 +537,7 @@ class PurchaseController extends Controller
                 $new_purchase_line = [
                     'product_id' => $purchase['product_id'],
                     'variation_id' => $purchase['variation_id'],
-                    'quantity' => $this->productUtil->num_uf($purchase['quantity'], $currency_details),
+                    'quantity' => floatval($purchase['quantity']),
                     'pp_without_discount' => $this->productUtil->num_uf($purchase['pp_without_discount'], $currency_details) * $exchange_rate,
                     'discount_percent' => $this->productUtil->num_uf($purchase['discount_percent'], $currency_details),
                     'purchase_price' => $this->productUtil->num_uf($purchase['purchase_price'], $currency_details) * $exchange_rate,
@@ -776,12 +788,20 @@ class PurchaseController extends Controller
             $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
 
             $update_data = $request->only([
-                'ref_no', 'status', 'contact_id',
-                'transaction_date', 'total_before_tax',
-                'discount_type', 'discount_amount', 'tax_id',
-                'tax_amount', 'shipping_details',
-                'shipping_charges', 'final_total',
-                'additional_notes', 'exchange_rate'
+                'ref_no',
+                'status',
+                'contact_id',
+                'transaction_date',
+                'total_before_tax',
+                'discount_type',
+                'discount_amount',
+                'tax_id',
+                'tax_amount',
+                'shipping_details',
+                'shipping_charges',
+                'final_total',
+                'additional_notes',
+                'exchange_rate'
             ]);
 
             $exchange_rate = $update_data['exchange_rate'];
