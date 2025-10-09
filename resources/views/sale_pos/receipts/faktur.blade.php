@@ -5,8 +5,9 @@
             <tr>
                 @php
                     // dd($receipt_details->logo);
-                    $logo = $receipt_details->logo;
-                    $path = Storage::url('invoice_logos/' . $logo);
+                    $lg_bus = Session::get('business.logo');
+                    $logo = !empty($lg_bus) ? $lg_bus : 'logo.png';
+                    $path = Storage::url('business_logos/' . $logo);
                     // dd($path);
                 @endphp
                 {{-- <h2 class="text-center"><img style="width: 10%;" src="{{url($path)}}"></h2> --}}
